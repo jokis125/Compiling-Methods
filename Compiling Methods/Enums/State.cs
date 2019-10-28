@@ -1,0 +1,46 @@
+namespace CompilingMethods.Classes
+{
+    public enum State
+    {
+        Start,
+        Ident,
+        //variable
+        LitInt,
+        LitStr,
+        LitEsc,
+        LitFloat,
+        LitFloatExp,
+        //operators
+        OpLess,
+        OpMore,
+        OpMoreEqual,
+        OpEqual,
+        OpNeg,
+        OpNotEqual,
+        OpAssign,
+        OpAdd,
+        OpAssAdd,
+        OpSub,
+        OpAssSub,
+        OpMul,
+        OpAssMul,
+        OpDiv,
+        OpAssDiv,
+        OpInc,
+        OpDec,
+        OpComma,
+        //separator
+        Separator,
+        //comments
+        Comment,
+        CommentMl,
+        CommentMlExit,
+        //curlies
+        ParenOp,
+        ParenCl,
+        BracesOp,
+        BracesCl,
+        //misc
+        Unknown
+    }
+}
