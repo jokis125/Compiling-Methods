@@ -8,15 +8,15 @@ namespace CompilingMethods.Classes
     {
         private string buffer;
         private char currentChar;
-        private string file;
-        private List<string> keywords = new List<string>();
+        private readonly string file;
+        private readonly List<string> keywords = new List<string>();
         private string allString;
         private State currentState = State.Start;
         private int line = 1;
         private int offset = 0;
         private int strAndComStart = 0;
         private bool printTokens = true;
-        private List<Token> tokens = new List<Token>();
+        private readonly List<Token> tokens = new List<Token>();
         private int tokenStart = 0;
         private bool running = true;
 
@@ -196,7 +196,6 @@ namespace CompilingMethods.Classes
                     CompleteToken(TokenType.Separator);
                     break;
                 default:
-                    //BeginToken(State.Unknown);
                     running = false;
                     currentState = State.Unknown;
                     PrintError(line,$"Unexpected char {currentChar}");
@@ -574,11 +573,6 @@ namespace CompilingMethods.Classes
                     break;
                 case State.Unknown:
                     running = false;
-                    //UnknownState();
-                    break;
-                    
-                default:
-                    //Console.WriteLine($"unknown state \t{currentState}");
                     break;
             }
         }
