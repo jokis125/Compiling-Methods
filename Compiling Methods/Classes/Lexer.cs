@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using CompilingMethods.Enums;
 
 namespace CompilingMethods.Classes
 {
@@ -35,10 +36,12 @@ namespace CompilingMethods.Classes
         {
             LexAll();
         }
-        
-        
 
-
+        public List<Token> GetTokens()
+        {
+            return tokens;
+        }
+        
         private void LexAll()
         {
             while (running && offset < allString.Length)

@@ -1,4 +1,5 @@
 using System;
+using CompilingMethods.Enums;
 
 namespace CompilingMethods.Classes
 {
@@ -22,6 +23,11 @@ namespace CompilingMethods.Classes
             var type = (" " + state).PadRight(16);
             Console.WriteLine($"{id}|{ln}|{type}|{value.GetType().ToString()}|{value}");
             //Console.WriteLine($"{id}|{ln}|{type}|{value}");
+        }
+
+        public TokenType GetState()
+        {
+            return state;
         }
     }
 }
