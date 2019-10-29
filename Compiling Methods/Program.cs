@@ -7,10 +7,10 @@ namespace CompilingMethods
     {
         static void Main(string[] args)
         {
-            var lexeris = new Lexer();
-            lexeris.GetText();
-            lexeris.StartLexer();
-            var parser = new Parser(lexeris.GetTokens());
+            var lexer = new Lexer();
+            lexer.GetText();
+            lexer.StartLexer();
+            var parser = new Parser(lexer.GetTokens());
             parser.ParseProgram();
         }
     }
