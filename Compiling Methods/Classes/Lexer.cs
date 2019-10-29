@@ -92,6 +92,7 @@ namespace CompilingMethods.Classes
         private void AddKeywords()
         {
             keywords.Add("if");
+            keywords.Add("else");
             keywords.Add("return");
             keywords.Add("break");
             keywords.Add("continue");
@@ -100,10 +101,11 @@ namespace CompilingMethods.Classes
             keywords.Add("float");
             keywords.Add("string");
             keywords.Add("char");
+            keywords.Add("void");
             keywords.Add("bool");
             keywords.Add("true");
             keywords.Add("false");
-            keywords.Add("void");
+
         }
 
         private void BeginToken(State newState)
@@ -223,7 +225,8 @@ namespace CompilingMethods.Classes
                     AddToBuffer(currentChar);
                     currentState = State.LitFloat;
                     break;
-                case char c when (!char.IsDigit(c) && c != ';' && c != ' ' && c != '\r' && c != '\n' && c != ')' && c != '}'):
+                case char c when (!char.IsDigit(c) && c != ';' && c != ' ' && c != '\r' && c != '\n' && c != ')' && c != '}'
+                                  && c != ','):
                     running = false;
                     AddToBuffer(currentChar);
                     PrintError(line,$"Bad int {buffer}");
@@ -281,6 +284,10 @@ namespace CompilingMethods.Classes
                     case string s when s == "if":
                         buffer = "";
                         CompleteToken(TokenType.If, false);
+                        break;
+                    case string s when s == "else":
+                        buffer = "";
+                        CompleteToken(TokenType.Else, false);
                         break;
                     case string s when s == "return":
                         buffer = "";

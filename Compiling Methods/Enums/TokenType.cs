@@ -31,6 +31,7 @@ namespace CompilingMethods.Enums
         BracesOp,
         BracesCl,
         If,
+        Else,
         Break,
         Return,
         While,

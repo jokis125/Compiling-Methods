@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 using CompilingMethods.Enums;
 
 namespace CompilingMethods.Classes
@@ -10,16 +11,19 @@ namespace CompilingMethods.Classes
         private Token currentToken;
         private int offset = 0;
         private bool running = true;
+        private List<String> typeNames = new List<string>();
 
         public Parser()
         {
             tokens = new List<Token>();
             currentToken = tokens[0];
+            FillTypeNames();
         }
         public Parser(List<Token> newTokens)
         {
             tokens = newTokens;
             currentToken = tokens[0];
+            FillTypeNames();
         }
 
         private Token Accept(TokenType type)
@@ -32,6 +36,15 @@ namespace CompilingMethods.Classes
                 return tokens[offset-1];
             }
             return null;
+        }
+
+        private void FillTypeNames()
+        {
+            typeNames.Add("int");
+            typeNames.Add("float");
+            typeNames.Add("string");
+            typeNames.Add("char");
+            typeNames.Add("void");
         }
 
         private void ThrowError(TokenType badToken)
@@ -59,6 +72,7 @@ namespace CompilingMethods.Classes
             while (tokens.Count != 0 && tokens[offset].GetState() != TokenType.Eof && running)
             {
                 ParseDecl();
+                //ParseDecl();
             }
             if(running && tokens.Count != 0)
                 Console.WriteLine("Yay!");
@@ -67,6 +81,11 @@ namespace CompilingMethods.Classes
         private void ParseLitInt()
         {
             Expect(TokenType.LitInt);
+        }
+
+        private void ParseLitStr()
+        {
+            Expect(TokenType.LitStr);
         }
 
         private void ParseExprVar()
@@ -84,6 +103,15 @@ namespace CompilingMethods.Classes
                     break;
                 case TokenType.Ident:
                     ParseExprVar();
+                    break;
+                case TokenType.LitFloat:
+                    break;
+                case TokenType.LitStr:
+                    ParseLitStr();
+                    break;
+                case TokenType.True:
+                    break;
+                case TokenType.False:
                     break;
                 case TokenType.ParenOp:
                     ParseExprParen();
@@ -131,7 +159,6 @@ namespace CompilingMethods.Classes
 
         private void ParseType()
         {
-            //var tokenType = tokens[offset].GetState();
             switch (currentToken.GetState())
             {
                 case TokenType.Boolean:
@@ -142,6 +169,12 @@ namespace CompilingMethods.Classes
                     break;
                 case TokenType.Int:
                     Expect(TokenType.Int);
+                    break;
+                case TokenType.String:
+                    Expect(TokenType.String);
+                    break;
+                case TokenType.Char:
+                    Expect(TokenType.Char);
                     break;
                 case TokenType.Void:
                     Expect(TokenType.Void);
@@ -164,7 +197,26 @@ namespace CompilingMethods.Classes
             ParseExprParen();
             ParseStmtBlock();
         }
-        
+
+        private void ParseStmtElif()
+        {
+            ParseStmtIf();
+            //if (Accept(TokenType.Else) != null)
+            while((Accept(TokenType.Else) != null))
+            {
+                if (Accept(TokenType.If) != null)
+                {
+                    ParseExprParen();
+                    ParseStmtBlock();
+                }
+                else
+                {
+                    ParseStmtBlock();
+                    break;
+                }
+            }
+        }
+
         private void ParseStmtReturn()
         {
             var tokenType = tokens[offset].GetState();
@@ -179,25 +231,85 @@ namespace CompilingMethods.Classes
             switch (currentToken.GetState())
             {
                 case TokenType.If:
-                    ParseStmtIf();
+                    ParseStmtElif();
                     break;
                 case TokenType.Return:
                     ParseStmtReturn();
+                    break;
+                case TokenType type when typeNames.Contains(type.ToString().ToLower()):
+                    ParseVarDecl();
+                    break;
+                case TokenType.Ident:
+                    ParseFnCall();
+                    break;
+                default:
+                    ThrowError(currentToken.GetState());
                     break;
             }
         }
 
         private void ParseDecl()
         {
-            ParseFnDecl();
+            ParseType();
+            Expect(TokenType.Ident);
+            if (Accept(TokenType.Separator) != null)
+                return;
+            switch (currentToken.GetState())
+            {
+                case TokenType.ParenOp:
+                    ParseFnDecl();
+                    break;
+                case TokenType.OpAssign:
+                    ParseAssign();
+                    break;
+            }
+        }
+
+        private void ParseFnCall()
+        {
+            Expect(TokenType.Ident);
+            Expect(TokenType.ParenOp);
+            if (currentToken.GetState() == TokenType.ParenCl)
+            {
+                Expect(TokenType.ParenCl);
+                Expect(TokenType.Separator);
+                return;
+            }
+            ParseExpr();
+            while (Accept(TokenType.OpComma) != null)
+            {
+                ParseExpr();
+            }
+
+            Expect(TokenType.ParenCl);
+            Expect(TokenType.Separator);
+        }
+
+        private void ParseArguments()
+        {
+            ParseExpr();
         }
 
         private void ParseFnDecl()
         {
-            ParseType();
-            Expect(TokenType.Ident);
             ParseParams();
             ParseStmtBlock();
+        }
+
+        private void ParseVarDecl()
+        {
+            ParseType();
+            Expect(TokenType.Ident);
+            if(Accept(TokenType.Separator) != null)
+                return;
+            ParseAssign();
+        }
+        
+        private void ParseAssign()
+        {
+            Expect(TokenType.OpAssign);
+            ParseExpr();
+            Expect(TokenType.Separator);
         }
 
         private void ParseParam()
