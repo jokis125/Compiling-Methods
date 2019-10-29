@@ -7,27 +7,31 @@ namespace CompilingMethods.Classes
     public class Parser
     {
         private readonly List<Token> tokens;
+        private Token currentToken;
         private int offset = 0;
         private bool running = true;
 
         public Parser()
         {
             tokens = new List<Token>();
+            currentToken = tokens[0];
         }
         public Parser(List<Token> newTokens)
         {
             tokens = newTokens;
+            currentToken = tokens[0];
         }
 
-        private bool Accept(TokenType type)
+        private Token Accept(TokenType type)
         {
-            var currentToken = tokens[offset];
+            currentToken = tokens[offset];
             if (currentToken.GetState() == type)
             {
                 offset++;
-                return true;
+                currentToken = tokens[offset];
+                return tokens[offset-1];
             }
-            return false;
+            return null;
         }
 
         private void ThrowError(TokenType badToken)
@@ -39,14 +43,15 @@ namespace CompilingMethods.Classes
 
         private Token Expect(TokenType type)
         {
-            var currentToken = tokens[offset];
+            currentToken = tokens[offset];
             if (currentToken.GetState() == type)
             {
                 offset++;
-                return currentToken;
+                currentToken = tokens[offset];
+                return tokens[offset-1];
             }
             ThrowError(currentToken.GetState());
-            return currentToken;
+            return null;
         }
 
         public void ParseProgram()
@@ -92,7 +97,7 @@ namespace CompilingMethods.Classes
         private void ParseExprMul()
         {
             ParseExprPrimary();
-            while (Accept(TokenType.OpMul))
+            while (Accept(TokenType.OpMul) != null)
             {
                 ParseExprPrimary();
             }
@@ -103,9 +108,9 @@ namespace CompilingMethods.Classes
             ParseExprMul();
             while (true)
             {
-                if(Accept(TokenType.OpAdd))
+                if(Accept(TokenType.OpAdd) != null)
                     ParseExprMul();
-                else if (Accept(TokenType.OpSub))
+                else if (Accept(TokenType.OpSub) != null)
                     ParseExprMul();
                 else
                     break;
@@ -126,8 +131,8 @@ namespace CompilingMethods.Classes
 
         private void ParseType()
         {
-            var tokenType = tokens[offset].GetState();
-            switch (tokenType)
+            //var tokenType = tokens[offset].GetState();
+            switch (currentToken.GetState())
             {
                 case TokenType.Boolean:
                     Expect(TokenType.Boolean);
@@ -135,8 +140,8 @@ namespace CompilingMethods.Classes
                 case TokenType.Float:
                     Expect(TokenType.Float);
                     break;
-                case TokenType.LitInt:
-                    Expect(TokenType.LitInt);
+                case TokenType.Int:
+                    Expect(TokenType.Int);
                     break;
                 case TokenType.Void:
                     Expect(TokenType.Void);
@@ -147,7 +152,7 @@ namespace CompilingMethods.Classes
         private void ParseStmtBlock()
         {
             Expect(TokenType.BracesOp);
-            while (!Accept(TokenType.BracesCl))
+            while (Accept(TokenType.BracesCl)  == null)
             {
                 ParseStatement();
             }
@@ -171,8 +176,7 @@ namespace CompilingMethods.Classes
 
         private void ParseStatement()
         {
-            var tokenType = tokens[offset].GetState();
-            switch (tokenType)
+            switch (currentToken.GetState())
             {
                 case TokenType.If:
                     ParseStmtIf();
@@ -204,16 +208,21 @@ namespace CompilingMethods.Classes
 
         private void ParseParams()
         {
-            var tokenType = tokens[offset].GetState();
+            //var tokenType = tokens[offset].GetState();
             Expect(TokenType.ParenOp);
-            if(tokenType == TokenType.ParenCl)
+            if (currentToken.GetState() == TokenType.ParenCl)
+            {
+                Expect(TokenType.ParenCl);
                 return;
+            }
+
             ParseParam();
-            while (!Accept(TokenType.OpComma))
+            while (Accept(TokenType.OpComma) != null)
             {
                 ParseParam();
             }
-            
+
+            Expect(TokenType.ParenCl);
         }
     }
 }
