@@ -6,7 +6,7 @@ namespace CompilingMethods.Classes
 {
     public class Parser
     {
-        private List<Token> tokens;
+        private readonly List<Token> tokens;
         private int offset = 0;
 
         public Parser()
@@ -18,20 +18,20 @@ namespace CompilingMethods.Classes
             tokens = newTokens;
         }
 
-        private Token Accept(TokenType type)
+        private bool Accept(TokenType type)
         {
             var currentToken = tokens[offset];
             if (currentToken.GetState() == type)
             {
                 offset++;
-                return currentToken;
+                return true;
             }
-            return currentToken;
+            return false;
         }
 
-        private void ThrowError(TokenType badToken, TokenType expectedToken)
+        private void ThrowError(TokenType badToken)
         {
-            Console.Write($"Bad token {badToken}, Expected token {expectedToken}");
+            Console.Write($"Bad token {badToken}");
         }
 
         private Token Expect(TokenType type)
@@ -43,13 +43,58 @@ namespace CompilingMethods.Classes
                 Console.WriteLine("yay");
                 return currentToken;
             }
-            ThrowError(currentToken.GetState(), type);
+            ThrowError(currentToken.GetState());
             return currentToken;
         }
 
         public void ParseLitInt()
         {
             Expect(TokenType.LitInt);
+        }
+
+        public void ParseExprVar()
+        {
+            Expect(TokenType.Ident);
+        }
+
+        public void ParseExprPrimary()
+        {
+            var tokenType = tokens[offset].GetState();
+            switch (tokenType)
+            {
+                case TokenType.LitInt:
+                    ParseLitInt();
+                    break;
+                case TokenType.Ident:
+                    ParseExprVar();
+                    break;
+                default:
+                    ThrowError(tokenType);
+                    break;
+            }
+        }
+
+        public void ParseExprMul()
+        {
+            ParseExprPrimary();
+            while (Accept(TokenType.OpMul))
+            {
+                ParseExprPrimary();
+            }
+        }
+
+        public void ParseExprAdd()
+        {
+            ParseExprMul();
+            while (true)
+            {
+                if(Accept(TokenType.OpAdd))
+                    ParseExprMul();
+                else if (Accept(TokenType.OpSub))
+                    ParseExprMul();
+                else
+                    break;
+            }
         }
         
     }
