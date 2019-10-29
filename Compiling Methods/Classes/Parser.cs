@@ -91,6 +91,8 @@ namespace CompilingMethods.Classes
         private void ParseExprVar()
         {
             Expect(TokenType.Ident);
+            if (currentToken.GetState() == TokenType.ParenOp)
+                ParseFnCall();
         }
 
         private void ParseExprPrimary()
@@ -103,6 +105,7 @@ namespace CompilingMethods.Classes
                     break;
                 case TokenType.Ident:
                     ParseExprVar();
+                    //Expect(TokenType.Separator);
                     break;
                 case TokenType.LitFloat:
                     break;
@@ -201,7 +204,6 @@ namespace CompilingMethods.Classes
         private void ParseStmtElif()
         {
             ParseStmtIf();
-            //if (Accept(TokenType.Else) != null)
             while((Accept(TokenType.Else) != null))
             {
                 if (Accept(TokenType.If) != null)
@@ -223,6 +225,7 @@ namespace CompilingMethods.Classes
             Expect(TokenType.Return);
             if(tokenType != TokenType.Separator)
                 ParseExpr();
+            Expect(TokenType.Separator);
         }
         
 
@@ -238,9 +241,11 @@ namespace CompilingMethods.Classes
                     break;
                 case TokenType type when typeNames.Contains(type.ToString().ToLower()):
                     ParseVarDecl();
+                    Expect(TokenType.Separator);
                     break;
                 case TokenType.Ident:
-                    ParseFnCall();
+                    ParseCall();
+                    Expect(TokenType.Separator);
                     break;
                 default:
                     ThrowError(currentToken.GetState());
@@ -265,9 +270,22 @@ namespace CompilingMethods.Classes
             }
         }
 
-        private void ParseFnCall()
+        private void ParseCall()
         {
             Expect(TokenType.Ident);
+            switch (currentToken.GetState())
+            {
+                case TokenType.ParenOp:
+                    ParseFnCall();
+                    break;
+                case TokenType.OpAssign:
+                    ParseAssign();
+                    break;
+            }
+        }
+
+        private void ParseFnCall()
+        {
             Expect(TokenType.ParenOp);
             if (currentToken.GetState() == TokenType.ParenCl)
             {
@@ -282,7 +300,6 @@ namespace CompilingMethods.Classes
             }
 
             Expect(TokenType.ParenCl);
-            Expect(TokenType.Separator);
         }
 
         private void ParseArguments()
@@ -309,7 +326,6 @@ namespace CompilingMethods.Classes
         {
             Expect(TokenType.OpAssign);
             ParseExpr();
-            Expect(TokenType.Separator);
         }
 
         private void ParseParam()
