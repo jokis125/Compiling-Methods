@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\Jokis\.Rider2019.2\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Jokis\.Rider2019.2\system\resharper-host\local\Transient\ReSharperHost\v192\SolutionCaches\_Compiling Methods.-1012416907.00" t="ExcludeRecursive" />
+    <e p="C:\Users\Jokis\RiderProjects\Compiling Methods" t="IncludeFlat">
+      <e p="Compiling Methods" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Classes" t="Include">
+          <e p="Lexer.cs" t="Include" />
+          <e p="Parser.cs" t="Include" />
+          <e p="Token.cs" t="Include" />
+        </e>
+        <e p="Compiling Methods.csproj" t="IncludeRecursive" />
+        <e p="Enums" t="Include">
+          <e p="State.cs" t="Include" />
+          <e p="TokenType.cs" t="Include" />
+        </e>
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.2" t="Include">
+              <e p="Compiling Methods.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="Program.cs" t="Include" />
+        <e p="program.txt" t="Include" />
+      </e>
+      <e p="Compiling Methods.sln" t="IncludeFlat" />
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>
