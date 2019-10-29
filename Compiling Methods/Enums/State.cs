@@ -1,4 +1,4 @@
-namespace CompilingMethods.Classes
+namespace CompilingMethods.Enums
 {
     public enum State
     {

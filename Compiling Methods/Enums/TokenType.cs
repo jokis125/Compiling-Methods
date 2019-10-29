@@ -1,4 +1,4 @@
-namespace CompilingMethods.Classes
+namespace CompilingMethods.Enums
 {
     public enum TokenType
     {
@@ -42,6 +42,7 @@ namespace CompilingMethods.Classes
         Boolean,
         True,
         False,
+        Void,
         Eof
     }
 }

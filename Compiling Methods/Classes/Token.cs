@@ -21,7 +21,7 @@ namespace CompilingMethods.Classes
             var id = (" " + count).PadRight(4);
             var ln = (" " + lineN).PadRight(5);
             var type = (" " + state).PadRight(16);
-            Console.WriteLine($"{id}|{ln}|{type}|{value.GetType().ToString()}|{value}");
+            Console.WriteLine($"{id}|{ln}|{type}|{value}");
             //Console.WriteLine($"{id}|{ln}|{type}|{value}");
         }
 

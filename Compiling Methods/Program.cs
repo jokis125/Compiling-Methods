@@ -11,7 +11,7 @@ namespace CompilingMethods
             lexeris.GetText();
             lexeris.StartLexer();
             var parser = new Parser(lexeris.GetTokens());
-            parser.ParseLitInt();
+            parser.ParseProgram();
         }
     }
 }

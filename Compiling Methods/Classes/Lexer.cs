@@ -78,6 +78,10 @@ namespace CompilingMethods.Classes
                     }
                 }
             }
+            else
+            {
+                tokens.Clear();
+            }
         }
 
         private void PrintError(int badLine, string errorMsg)
@@ -99,6 +103,7 @@ namespace CompilingMethods.Classes
             keywords.Add("bool");
             keywords.Add("true");
             keywords.Add("false");
+            keywords.Add("void");
         }
 
         private void BeginToken(State newState)
@@ -218,7 +223,7 @@ namespace CompilingMethods.Classes
                     AddToBuffer(currentChar);
                     currentState = State.LitFloat;
                     break;
-                case char c when (!char.IsDigit(c) && c != ';' && c != ' ' && c != '\r' && c != '\n'):
+                case char c when (!char.IsDigit(c) && c != ';' && c != ' ' && c != '\r' && c != '\n' && c != ')' && c != '}'):
                     running = false;
                     AddToBuffer(currentChar);
                     PrintError(line,$"Bad int {buffer}");
@@ -312,6 +317,10 @@ namespace CompilingMethods.Classes
                     case "bool":
                         buffer = "";
                         CompleteToken(TokenType.Boolean, false);
+                        break;
+                    case "void":
+                        buffer = "";
+                        CompleteToken(TokenType.Void, false);
                         break;
                     case "true":
                         buffer = "";
