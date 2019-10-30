@@ -270,6 +270,7 @@ namespace CompilingMethods.Classes
                     break;
                 case TokenType.OpAssign:
                     ParseAssign();
+                    Expect(TokenType.Separator);
                     break;
             }
         }
