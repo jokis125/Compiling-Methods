@@ -20,6 +20,10 @@ namespace CompilingMethods.Enums
         OpMul,
         OpDiv,
         OpComma,
+        OpAnd,
+        OpBinAnd,
+        OpOr,
+        OpBinOr,
         //separator
         Separator,
         //comments

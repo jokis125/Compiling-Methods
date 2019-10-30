@@ -169,6 +169,12 @@ namespace CompilingMethods.Classes
                 case char c when c == '!':
                     BeginToken(State.OpNeg);
                     break;
+                case char c  when c == '&':
+                    BeginToken(State.OpBinAnd);
+                    break;
+                case char c when c == '|':
+                    BeginToken(State.OpBinOr);
+                    break;
                 case char c when c == '(':
                     BeginToken(State.ParenOp);
                     CompleteToken(TokenType.ParenOp);
@@ -491,10 +497,10 @@ namespace CompilingMethods.Classes
             switch (currentChar)
             {
                 case '+':
-                    CompleteToken(TokenType.OpInc, false);
+                    CompleteToken(TokenType.OpInc);
                     break;
                 case '=':
-                    CompleteToken(TokenType.OpAssAdd, false);
+                    CompleteToken(TokenType.OpAssAdd);
                     break;
                 default:
                     CompleteToken(TokenType.OpAdd, false);
@@ -507,10 +513,10 @@ namespace CompilingMethods.Classes
             switch (currentChar)
             {
                 case '-':
-                    CompleteToken(TokenType.OpDec, false);
+                    CompleteToken(TokenType.OpDec);
                     break;
                 case '=':
-                    CompleteToken(TokenType.OpAssSub, false);
+                    CompleteToken(TokenType.OpAssSub);
                     break;
                 default:
                     CompleteToken(TokenType.OpSub, false);
@@ -523,10 +529,36 @@ namespace CompilingMethods.Classes
             switch (currentChar)
             {
                 case '=':
-                    CompleteToken(TokenType.OpAssMul, false);
+                    CompleteToken(TokenType.OpAssMul);
                     break;
                 default:
                     CompleteToken(TokenType.OpMul, false);
+                    break;
+            }
+        }
+
+        private void LexOpOr()
+        {
+            switch (currentChar)
+            {
+                case '|':
+                    CompleteToken(TokenType.OpOr);
+                    break;
+                default:
+                    CompleteToken(TokenType.OpBinOr, false);
+                    break;
+            }
+        }
+
+        private void LexOpAnd()
+        {
+            switch (currentChar)
+            {
+                case '&':
+                    CompleteToken(TokenType.OpAnd);
+                    break;
+                default:
+                    CompleteToken(TokenType.OpBinAnd, false);
                     break;
             }
         }
@@ -589,6 +621,12 @@ namespace CompilingMethods.Classes
                     break;
                 case State.OpNeg:
                     LexLitOpNotEqual();
+                    break;
+                case State.OpBinAnd:
+                    LexOpAnd();
+                    break;
+                case State.OpBinOr:
+                    LexOpOr();
                     break;
                 case State.Unknown:
                     running = false;
