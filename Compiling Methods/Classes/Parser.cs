@@ -82,6 +82,10 @@ namespace CompilingMethods.Classes
         {
             Expect(TokenType.LitInt);
         }
+        private void ParseLitFloat()
+        {
+            Expect(TokenType.LitFloat);
+        }
 
         private void ParseLitStr()
         {
@@ -105,9 +109,9 @@ namespace CompilingMethods.Classes
                     break;
                 case TokenType.Ident:
                     ParseExprVar();
-                    //Expect(TokenType.Separator);
                     break;
                 case TokenType.LitFloat:
+                    ParseLitFloat();
                     break;
                 case TokenType.LitStr:
                     ParseLitStr();
@@ -290,7 +294,6 @@ namespace CompilingMethods.Classes
             if (currentToken.GetState() == TokenType.ParenCl)
             {
                 Expect(TokenType.ParenCl);
-                Expect(TokenType.Separator);
                 return;
             }
             ParseExpr();
@@ -310,7 +313,8 @@ namespace CompilingMethods.Classes
         private void ParseFnDecl()
         {
             ParseParams();
-            ParseStmtBlock();
+            if(Accept(TokenType.Separator) == null)
+                ParseStmtBlock();
         }
 
         private void ParseVarDecl()
