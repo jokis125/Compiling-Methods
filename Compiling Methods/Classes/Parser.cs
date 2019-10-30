@@ -78,47 +78,60 @@ namespace CompilingMethods.Classes
                 Console.WriteLine("Yay!");
         }
 
-        private void ParseLitInt()
+        private Token ParseLitInt()
         {
-            Expect(TokenType.LitInt);
+            return Expect(TokenType.LitInt);
         }
-        private void ParseLitFloat()
+        private Token ParseLitFloat()
         {
-            Expect(TokenType.LitFloat);
-        }
-
-        private void ParseLitStr()
-        {
-            Expect(TokenType.LitStr);
+            return Expect(TokenType.LitFloat);
         }
 
-        private void ParseExprVar()
+        private Token ParseLitStr()
         {
-            Expect(TokenType.Ident);
+            return Expect(TokenType.LitStr);
+        }
+        
+        private Token ParseTrue()
+        {
+            return Expect(TokenType.True);
+        }
+        
+        private Token ParseFalse()
+        {
+            return Expect(TokenType.False);
+        }
+
+        private Token ParseExprVar()
+        {
+            var result = Expect(TokenType.Ident);
             if (currentToken.GetState() == TokenType.ParenOp)
                 ParseFnCall();
+            return result;
         }
 
-        private void ParseExprPrimary()
+        private Token ParseExprPrimary()
         {
             var tokenType = tokens[offset].GetState();
             switch (tokenType)
             {
                 case TokenType.LitInt:
-                    ParseLitInt();
+                    return ParseLitInt();
                     break;
                 case TokenType.Ident:
-                    ParseExprVar();
+                    return ParseExprVar();
                     break;
                 case TokenType.LitFloat:
-                    ParseLitFloat();
+                    return ParseLitFloat();
                     break;
                 case TokenType.LitStr:
-                    ParseLitStr();
+                    return ParseLitStr();
                     break;
                 case TokenType.True:
+                    return ParseTrue();
                     break;
                 case TokenType.False:
+                    return ParseFalse();
                     break;
                 case TokenType.ParenOp:
                     ParseExprParen();
@@ -127,12 +140,13 @@ namespace CompilingMethods.Classes
                     ThrowError(tokenType);
                     break;
             }
+            return null;
         }
 
         private void ParseExprMul()
         {
             ParseExprPrimary();
-            while (Accept(TokenType.OpMul) != null)
+            while (Accept(TokenType.OpMul) != null || Accept(TokenType.OpDiv) != null)
             {
                 ParseExprPrimary();
             }
@@ -151,10 +165,65 @@ namespace CompilingMethods.Classes
                     break;
             }
         }
+        
+        private void ParseExprCmpEquals()
+        {
+            ParseExprAdd();
+            while (true)
+            {
+                if(Accept(TokenType.OpEqual) != null)
+                    ParseExprAdd();
+                else if (Accept(TokenType.OpNotEqual) != null)
+                    ParseExprAdd();
+                else
+                    break;
+            }
+        }
+        
+        private void ParseExprCmp()
+        {
+            ParseExprCmpEquals();
+            while (true)
+            {
+                if(Accept(TokenType.OpLess) != null)
+                    ParseExprCmpEquals();
+                else if (Accept(TokenType.OpMore) != null)
+                    ParseExprCmpEquals();
+                else if (Accept(TokenType.OpLessEqual) != null)
+                    ParseExprCmpEquals();
+                else if (Accept(TokenType.OpMoreEqual) != null)
+                    ParseExprCmpEquals();
+                else
+                    break;
+            }
+        }
+        
+        private void ParseExprAnd()
+        {
+            ParseExprCmp();
+            while (true)
+            {
+                if(Accept(TokenType.OpAnd) != null)
+                    ParseExprCmp();
+                else
+                 break;
+            }
+        }
+        private void ParseExprOr()
+        {
+            ParseExprAnd();
+            while (true)
+            {
+                if(Accept(TokenType.OpOr) != null)
+                    ParseExprAnd();
+                else
+                    break;
+            }
+        }
 
         private void ParseExpr()
         {
-            ParseExprAdd();
+            ParseExprOr();
         }
 
         private void ParseExprParen()
@@ -223,13 +292,22 @@ namespace CompilingMethods.Classes
             }
         }
 
+        private void ParseStmtWhile()
+        {
+            Expect(TokenType.While);
+            ParseExprParen();
+            ParseStmtBlock();
+        }
+        private void ParseStmtBreak()
+        {
+            Expect(TokenType.Break);
+        }
+
         private void ParseStmtReturn()
         {
-            var tokenType = tokens[offset].GetState();
             Expect(TokenType.Return);
-            if(tokenType != TokenType.Separator)
+            if(currentToken.GetState() != TokenType.Separator)
                 ParseExpr();
-            Expect(TokenType.Separator);
         }
         
 
@@ -240,8 +318,16 @@ namespace CompilingMethods.Classes
                 case TokenType.If:
                     ParseStmtElif();
                     break;
+                case TokenType.While:
+                    ParseStmtWhile();
+                    break;
+                case TokenType.Break:
+                    ParseStmtBreak();
+                    Expect(TokenType.Separator);
+                    break;
                 case TokenType.Return:
                     ParseStmtReturn();
+                    Expect(TokenType.Separator);
                     break;
                 case TokenType type when typeNames.Contains(type.ToString().ToLower()):
                     ParseVarDecl();
