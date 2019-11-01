@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using CompilingMethods.Classes.Exceptions;
 using CompilingMethods.Enums;
 
-namespace CompilingMethods.Classes
+namespace CompilingMethods.Classes.Lexer
 {
     public class Lexer
     {

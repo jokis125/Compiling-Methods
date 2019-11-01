@@ -1,6 +1,6 @@
 using System;
 
-namespace CompilingMethods.Classes
+namespace CompilingMethods.Classes.Exceptions
 {
     public class BadTokenException : Exception
     {

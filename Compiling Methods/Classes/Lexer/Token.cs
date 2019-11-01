@@ -1,7 +1,7 @@
 using System;
 using CompilingMethods.Enums;
 
-namespace CompilingMethods.Classes
+namespace CompilingMethods.Classes.Lexer
 {
     public class Token
     {
