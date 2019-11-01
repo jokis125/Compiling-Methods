@@ -5,14 +5,12 @@ namespace CompilingMethods.Classes
 {
     public class Token
     {
-        private readonly TokenType state;
-        private readonly dynamic value;
         private readonly int lineN;
 
         public Token(TokenType newState, dynamic newValue, int newLineNr)
         {
-            state = newState;
-            value = newValue;
+            State = newState;
+            Value = newValue;
             lineN = newLineNr;
         }
 
@@ -20,14 +18,15 @@ namespace CompilingMethods.Classes
         {
             var id = (" " + count).PadRight(4);
             var ln = (" " + lineN).PadRight(5);
-            var type = (" " + state).PadRight(16);
-            Console.WriteLine($"{id}|{ln}|{type}|{value}");
+            var type = (" " + State).PadRight(16);
+            Console.WriteLine($"{id}|{ln}|{type}|{Value}");
             //Console.WriteLine($"{id}|{ln}|{type}|{value}");
         }
 
-        public TokenType GetState()
-        {
-            return state;
-        }
+        public TokenType State { get; }
+
+        public dynamic Value { get; }
+
+        public int LineN => lineN;
     }
 }

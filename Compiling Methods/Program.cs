@@ -11,7 +11,9 @@ namespace CompilingMethods
             lexer.GetText();
             lexer.StartLexer();
             var parser = new Parser(lexer.GetTokens());
-            parser.ParseProgram();
+            var root = parser.ParseProgram();
+            var printer = new AstPrinter();
+            printer.Print("root", root);
         }
     }
 }
