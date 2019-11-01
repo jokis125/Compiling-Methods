@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
 using CompilingMethods.Enums;
 
 namespace CompilingMethods.Classes
@@ -9,16 +8,8 @@ namespace CompilingMethods.Classes
     {
         private readonly List<Token> tokens;
         private Token currentToken;
-        private int offset = 0;
-        private bool running = true;
-        private List<String> typeNames = new List<string>();
-
-        public Parser()
-        {
-            tokens = new List<Token>();
-            currentToken = tokens[0];
-            FillTypeNames();
-        }
+        private int offset;
+        private readonly List<string> typeNames = new List<string>();
         public Parser(List<Token> newTokens)
         {
             tokens = newTokens;
@@ -69,11 +60,11 @@ namespace CompilingMethods.Classes
         public List<INode> ParseProgram()
         {
             var decls = new List<INode>();
-            while (tokens.Count != 0 && tokens[offset].State != TokenType.Eof && running)
+            while (tokens.Count != 0 && tokens[offset].State != TokenType.Eof)
             {
                 decls.Add(ParseDecl());
             }
-            if(running && tokens.Count != 0)
+            if(tokens.Count != 0)
                 Console.WriteLine("Yay!");
             return decls;
         }
@@ -117,25 +108,18 @@ namespace CompilingMethods.Classes
             {
                 case TokenType.LitInt:
                     return ParseLitInt();
-                    break;
                 case TokenType.Ident:
                     return ParseExprVar(tokens[offset]);
-                    break;
                 case TokenType.LitFloat:
                     return ParseLitFloat();
-                    break;
                 case TokenType.LitStr:
                     return ParseLitStr();
-                    break;
                 case TokenType.True:
                     return ParseTrue();
-                    break;
                 case TokenType.False:
                     return ParseFalse();
-                    break;
                 case TokenType.ParenOp:
-                    ParseExprParen();
-                    break;
+                    return ParseExprParen();
                 default:
                     ThrowError(tokenType);
                     break;
@@ -253,22 +237,16 @@ namespace CompilingMethods.Classes
                 case TokenType.Boolean:
                     //return new TypePrim(Expect(TokenType.Boolean));
                     return Expect(TokenType.Boolean);
-                    break;
                 case TokenType.Float:
                     return Expect(TokenType.Float);
-                    break;
                 case TokenType.Int:
                     return Expect(TokenType.Int);
-                    break;
                 case TokenType.String:
                     return Expect(TokenType.String);
-                    break;
                 case TokenType.Char:
                     return Expect(TokenType.Char);
-                    break;
                 case TokenType.Void:
                     return Expect(TokenType.Void);
-                    break;
             }
             return null;
         }
@@ -295,12 +273,11 @@ namespace CompilingMethods.Classes
 
         private List<IStatement> ParseStmtElif()
         {
-            var stmts = new List<IStatement>();
-            stmts.Add(ParseStmtIf());
+            var stmts = new List<IStatement> {ParseStmtIf()};
             while((Accept(TokenType.Else) != null))
             {
                 IExpression expression;
-                var stmtBlock = new List<IStatement>();
+                List<IStatement> stmtBlock;
                 if (Accept(TokenType.If) != null)
                 {
                     expression = ParseExprParen();
@@ -324,16 +301,21 @@ namespace CompilingMethods.Classes
             var body = ParseStmtBlock();
             return new StmtWhile(cond, body);
         }
-        private void ParseStmtBreak()
+        private IStatement ParseStmtBreak()
         {
             Expect(TokenType.Break);
+            return new StmtBreak();
         }
 
-        private void ParseStmtReturn()
+        private IStatement ParseStmtReturn()
         {
             Expect(TokenType.Return);
-            if(currentToken.State != TokenType.Separator)
-                ParseExpr();
+            if (currentToken.State != TokenType.Separator)
+            {
+                var expr = ParseExpr();
+                return new StmtRet(expr);
+            }
+            return new StmtRet(null);
         }
         
 
@@ -345,28 +327,24 @@ namespace CompilingMethods.Classes
                 case TokenType.If:
                     list = ParseStmtElif();
                     return list;
-                    break;
                 case TokenType.While:
                     list.Add(ParseStmtWhile());
                     return list;
-                    break;
                 case TokenType.Break:
-                    ParseStmtBreak();
+                    list.Add(ParseStmtBreak());
                     Expect(TokenType.Separator);
-                    break;
+                    return list;
                 case TokenType.Return:
-                    ParseStmtReturn();
+                    list.Add(ParseStmtReturn());
                     Expect(TokenType.Separator);
-                    break;
+                    return list;
                 case TokenType type when typeNames.Contains(type.ToString().ToLower()):
                     list.Add(ParseVarDecl());
                     return list;
-                    break;
                 case TokenType.Ident:
                     list.Add(ParseCall());
                     Expect(TokenType.Separator);
                     return list;
-                    break;
                 default:
                     ThrowError(currentToken.State);
                     break;
@@ -385,11 +363,8 @@ namespace CompilingMethods.Classes
             {
                 case TokenType.ParenOp:
                     return ParseFnDecl(type, name.Value);
-                    break;
                 case TokenType.OpAssign:
                     return new StmtVar(type, name, ParseAssign());
-                    Expect(TokenType.Separator);
-                    break;
             }
 
             return null;
@@ -426,11 +401,6 @@ namespace CompilingMethods.Classes
 
             Expect(TokenType.ParenCl);
             return new StmtFnCall(ident, args);
-        }
-
-        private void ParseArguments()
-        {
-            ParseExpr();
         }
 
         private DeclFn ParseFnDecl(Token type, string name)
