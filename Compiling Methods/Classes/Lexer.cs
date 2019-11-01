@@ -11,6 +11,7 @@ namespace CompilingMethods.Classes
         private char currentChar;
         private readonly string file;
         private readonly List<string> keywords = new List<string>();
+        private readonly List<char> acceptableCharsAfterInt = new List<char>();
         private string allString;
         private State currentState = State.Start;
         private int line = 1;
@@ -25,6 +26,7 @@ namespace CompilingMethods.Classes
         {
             file = input;
             AddKeywords();
+            AddChars();
         }
 
         public void GetText()
@@ -105,7 +107,26 @@ namespace CompilingMethods.Classes
             keywords.Add("bool");
             keywords.Add("true");
             keywords.Add("false");
+        }
 
+        private void AddChars()
+        {
+            /*case char c when (!char.IsDigit(c) && c != ';' && c != ' ' && c != '\r' && c != '\n' && c != ')' && c != '}'
+                              && c != ',' &&):*/
+            acceptableCharsAfterInt.Add(';');
+            acceptableCharsAfterInt.Add(' ');
+            acceptableCharsAfterInt.Add('\r');
+            acceptableCharsAfterInt.Add('\n');
+            acceptableCharsAfterInt.Add(')');
+            acceptableCharsAfterInt.Add('}');
+            acceptableCharsAfterInt.Add(',');
+            acceptableCharsAfterInt.Add('+');
+            acceptableCharsAfterInt.Add('-');
+            acceptableCharsAfterInt.Add('*');
+            acceptableCharsAfterInt.Add('/');
+            acceptableCharsAfterInt.Add('|');
+            acceptableCharsAfterInt.Add('&');
+            acceptableCharsAfterInt.Add('%');
         }
 
         private void BeginToken(State newState)
@@ -231,8 +252,7 @@ namespace CompilingMethods.Classes
                     AddToBuffer(currentChar);
                     currentState = State.LitFloat;
                     break;
-                case char c when (!char.IsDigit(c) && c != ';' && c != ' ' && c != '\r' && c != '\n' && c != ')' && c != '}'
-                                  && c != ','):
+                case char c when (!char.IsDigit(c) && !acceptableCharsAfterInt.Contains(c)):
                     running = false;
                     AddToBuffer(currentChar);
                     PrintError(line,$"Bad int {buffer}");
