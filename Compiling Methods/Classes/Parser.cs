@@ -10,11 +10,13 @@ namespace CompilingMethods.Classes
         private Token currentToken;
         private int offset;
         private readonly List<string> typeNames = new List<string>();
-        public Parser(List<Token> newTokens)
+        private readonly string scriptName;
+        public Parser(List<Token> newTokens, string filename)
         {
             tokens = newTokens;
             currentToken = tokens[0];
             FillTypeNames();
+            scriptName = filename;
         }
 
         private Token Accept(TokenType type)
@@ -39,9 +41,9 @@ namespace CompilingMethods.Classes
             typeNames.Add("boolean");
         }
 
-        private void ThrowError(TokenType badToken)
+        private void ThrowError(Token badToken)
         {
-            throw new InvalidOperationException($"Bad token {badToken}");
+            throw new BadTokenException($"Bad token {badToken.State} in {scriptName}:line {badToken.LineN}");
         }
 
         private Token Expect(TokenType type)
@@ -53,7 +55,7 @@ namespace CompilingMethods.Classes
                 currentToken = tokens[offset];
                 return tokens[offset-1];
             }
-            ThrowError(currentToken.State);
+            ThrowError(currentToken);
             return null;
         }
 
@@ -140,7 +142,7 @@ namespace CompilingMethods.Classes
                 case TokenType.ParenOp:
                     return ParseExprParen();
                 default:
-                    ThrowError(tokenType);
+                    ThrowError(currentToken);
                     break;
             }
             return null;
@@ -384,7 +386,7 @@ namespace CompilingMethods.Classes
                     Expect(TokenType.Separator);
                     return list;
                 default:
-                    ThrowError(currentToken.State);
+                    ThrowError(currentToken);
                     break;
             }
 

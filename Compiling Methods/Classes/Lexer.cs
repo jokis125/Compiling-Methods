@@ -22,6 +22,7 @@ namespace CompilingMethods.Classes
         private int tokenStart = 0;
         private bool running = true;
 
+
         public Lexer(string input = "program.txt")
         {
             file = input;
@@ -29,7 +30,12 @@ namespace CompilingMethods.Classes
             AddChars();
         }
 
-        public void GetText()
+        public string GetScriptName()
+        {
+            return Path.GetFullPath("..\\..\\..\\"+file);
+        }
+
+    public void GetText()
         {
             allString = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\"+file));
         }
@@ -88,7 +94,7 @@ namespace CompilingMethods.Classes
 
         private void PrintError(int badLine, string errorMsg)
         {
-            Console.WriteLine($"{file}: {badLine}: error: {errorMsg}");
+            throw new LexerException($"{errorMsg} in {Path.GetFullPath("..\\..\\..\\"+file)}:line {badLine}");
         }
 
         private void AddKeywords()
