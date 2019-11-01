@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CompilingMethods.Enums;
 
 namespace CompilingMethods.Classes
 {
@@ -9,8 +10,8 @@ namespace CompilingMethods.Classes
 
     public class StmtIf : IStatement
     {
-        private IExpression condition;
-        private List<IStatement> body;
+        private readonly IExpression condition;
+        private readonly List<IStatement> body;
 
         public StmtIf(IExpression condition, List<IStatement> body)
         {
@@ -27,7 +28,7 @@ namespace CompilingMethods.Classes
     
     public class StmtElse : IStatement
     {
-        private List<IStatement> body;
+        private readonly List<IStatement> body;
 
         public StmtElse( List<IStatement> body)
         {
@@ -42,23 +43,31 @@ namespace CompilingMethods.Classes
 
     public class StmtRet : IStatement
     {
-        private INode value;
+        private readonly IExpression value;
 
-        public StmtRet(INode value)
+        public StmtRet(IExpression value)
         {
             this.value = value;
         }
 
         public void PrintNode(AstPrinter p)
         {
-            throw new System.NotImplementedException();
+            p.Print("value", value);
+        }
+    }
+    
+    public class StmtBreak : IStatement
+    {
+        public void PrintNode(AstPrinter p)
+        {
+            p.Print("break", null);
         }
     }
     
     public class StmtWhile : IStatement
     {
-        private IExpression condition;
-        private List<IStatement> body;
+        private readonly IExpression condition;
+        private readonly List<IStatement> body;
 
         public StmtWhile(IExpression condition, List<IStatement> body)
         {
@@ -75,9 +84,9 @@ namespace CompilingMethods.Classes
 
     public class StmtVar : IStatement
     {
-        private Token type;
-        private Token ident;
-        private IExpression value;
+        private readonly Token type;
+        private readonly Token ident;
+        private readonly IExpression value;
 
         public StmtVar(Token type, Token ident)
         {
@@ -103,27 +112,30 @@ namespace CompilingMethods.Classes
     
     public class StmtVarAssign : IStatement
     {
-        private Token ident;
-        private IExpression value;
+        private readonly Token ident;
+        private readonly TokenType op;
+        private readonly IExpression value;
 
 
-        public StmtVarAssign(Token ident, IExpression value)
+        public StmtVarAssign(Token ident, TokenType op, IExpression value)
         {
             this.ident = ident;
+            this.op = op;
             this.value = value;
         }
 
         public void PrintNode(AstPrinter p)
         {
             p.Print("name", ident);
+            p.Print("operator", op);
             p.Print("value", value);
         }
     }
     
     public class StmtFnCall : IStatement
     {
-        private Token ident;
-        private List<IExpression> args;
+        private readonly Token ident;
+        private readonly List<IExpression> args;
 
         public StmtFnCall(Token ident, List<IExpression> args)
         {

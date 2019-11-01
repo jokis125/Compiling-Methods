@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
+using CompilingMethods.Enums;
 
 namespace CompilingMethods.Classes
 {
@@ -33,16 +34,24 @@ namespace CompilingMethods.Classes
             {
                 PrintArray(title, (List<Param>)obj);
             }
+            else if (obj.GetType() == typeof(List<IExpression>))
+            {
+                PrintArray(title, (List<IExpression>)obj);
+            }
             else if (obj.GetType() == typeof(Token))
             {
                 PrintToken(title, (Token)obj);
+            }
+            else if (obj.GetType() == typeof(TokenType))
+            {
+                PrintTokenType(title, (TokenType)obj);
             }
             else if (obj is string)
             {
                 PrintText(title, obj.ToString());
             }
         }
-
+        
         void PrintArray(string title, List<INode> array)
         {
             if (array.Count == 0)
@@ -90,6 +99,22 @@ namespace CompilingMethods.Classes
                 Print(elemTitle, elem);
             }
         }
+        
+        void PrintArray(string title, List<IExpression> array)
+        {
+            if (array.Count == 0)
+            {
+                PrintText(title, "[]");
+                return;
+            }
+
+            var index = 0;
+            foreach (var elem in array)
+            {
+                var elemTitle = $"{title}[{index++}]";
+                Print(elemTitle, elem);
+            }
+        }
 
         private void PrintNode(string title, INode node)
         {
@@ -108,6 +133,11 @@ namespace CompilingMethods.Classes
         void PrintToken(string title, Token token)
         {
             PrintText(title, $"{token.State} ({token.Value})");
+        }
+        
+        void PrintTokenType(string title, TokenType token)
+        {
+            PrintText(title, $"{token} ()");
         }
     }
 }

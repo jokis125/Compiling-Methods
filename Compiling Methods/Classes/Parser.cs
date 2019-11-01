@@ -93,12 +93,31 @@ namespace CompilingMethods.Classes
             return new ExprLit(Expect(TokenType.False));
         }
 
-        private ExprLit ParseExprVar(Token ident)
+        private IExpression ParseExprVar(Token ident)
         {
             var result = new ExprLit(Expect(TokenType.Ident));
             if (currentToken.State == TokenType.ParenOp)
-                ParseFnCall(ident);
+                return ParseExprCall(ident);
             return result;
+        }
+        
+        private ExprFnCall ParseExprCall(Token ident)
+        {
+            Expect(TokenType.ParenOp);
+            var args = new List<IExpression>();
+            if (currentToken.State == TokenType.ParenCl)
+            {
+                Expect(TokenType.ParenCl);
+                return new ExprFnCall(ident, args);
+            }
+            args.Add(ParseExpr());
+            while (Accept(TokenType.OpComma) != null)
+            {
+                args.Add(ParseExpr());
+            }
+
+            Expect(TokenType.ParenCl);
+            return new ExprFnCall(ident, args);
         }
 
         private IExpression ParseExprPrimary()
@@ -134,6 +153,19 @@ namespace CompilingMethods.Classes
             {
                 result = new ExprBin(TokenType.OpMul, result, ParseExprPrimary());
             }
+            while (true)
+            {
+                if (Accept(TokenType.OpMul) != null)
+                    result = new ExprBin(TokenType.OpMul, result, ParseExprMul());
+                else if (Accept(TokenType.OpDiv) != null)
+                    result = new ExprBin(TokenType.OpDiv, result, ParseExprMul());
+                else if (Accept(TokenType.OpAssMul) != null)
+                    result = new ExprBin(TokenType.OpAssMul, result, ParseExprMul());
+                else if(Accept(TokenType.OpAssDiv) != null)
+                    result = new ExprBin(TokenType.OpAssDiv, result, ParseExprMul());
+                else
+                    break;
+            }
 
             return result;
         }
@@ -147,8 +179,14 @@ namespace CompilingMethods.Classes
                 {
                     result = new ExprBin(TokenType.OpAdd, result, ParseExprMul());
                 }
+                else if (Accept(TokenType.OpAssAdd) != null)
+                {
+                    result = new ExprBin(TokenType.OpAssAdd, result, ParseExprMul());
+                }
                 else if (Accept(TokenType.OpSub) != null)
                     result = new ExprBin(TokenType.OpSub, result, ParseExprMul());
+                else if(Accept(TokenType.OpAssSub) != null)
+                    result = new ExprBin(TokenType.OpAssSub, result, ParseExprMul());
                 else
                     break;
             }
@@ -373,13 +411,26 @@ namespace CompilingMethods.Classes
         private IStatement ParseCall()
         {
             var ident = Expect(TokenType.Ident);
+            IExpression expr;
             switch (currentToken.State)
             {
                 case TokenType.ParenOp:
                     return ParseFnCall(ident);
                 case TokenType.OpAssign:
-                    var expr = ParseAssign();
-                    return new StmtVarAssign(ident, expr);
+                    expr = ParseAssign();
+                    return new StmtVarAssign(ident, TokenType.OpAssign, expr);
+                case TokenType.OpAssAdd:
+                    expr = ParseAssign();
+                    return new StmtVarAssign(ident, TokenType.OpAssAdd, expr);
+                case TokenType.OpAssSub:
+                    expr = ParseAssign();
+                    return new StmtVarAssign(ident, TokenType.OpAssSub, expr);
+                case TokenType.OpAssDiv:
+                    expr = ParseAssign();
+                    return new StmtVarAssign(ident, TokenType.OpAssDiv, expr);
+                case TokenType.OpAssMul:
+                    expr = ParseAssign();
+                    return new StmtVarAssign(ident, TokenType.OpAssMul, expr);
             }
             return null;
         }
@@ -425,7 +476,24 @@ namespace CompilingMethods.Classes
         
         private IExpression ParseAssign()
         {
-            Expect(TokenType.OpAssign);
+            switch (currentToken.State)
+            {
+                case TokenType.OpAssign:
+                    Expect(TokenType.OpAssign);
+                    break;
+                case TokenType.OpAssAdd:
+                    Expect(TokenType.OpAssAdd);
+                    break;
+                case TokenType.OpAssSub:
+                    Expect(TokenType.OpAssSub);
+                    break;
+                case TokenType.OpAssDiv:
+                    Expect(TokenType.OpAssDiv);
+                    break;
+                case TokenType.OpAssMul:
+                    Expect(TokenType.OpAssMul);
+                    break;
+            }
             return ParseExpr();
         }
 

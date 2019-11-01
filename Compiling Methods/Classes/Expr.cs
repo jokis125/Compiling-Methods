@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CompilingMethods.Enums;
 
 namespace CompilingMethods.Classes
@@ -46,6 +47,24 @@ namespace CompilingMethods.Classes
             p.Print("op", new Token(op, "", 1));
             p.Print("left", left);
             p.Print("right", right);
+        }
+    }
+
+    public class ExprFnCall : IExpression
+    {
+        private Token ident;
+        private List<IExpression> args;
+
+        public ExprFnCall(Token ident, List<IExpression> args)
+        {
+            this.ident = ident;
+            this.args = args;
+        }
+
+        public void PrintNode(AstPrinter p)
+        {
+            p.Print("ident", ident);
+            p.Print("args", args);
         }
     }
 }
