@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using CompilingMethods.Classes;
-using CompilingMethods.Classes.Lexer;
+﻿using CompilingMethods.Classes.Lexer;
 using CompilingMethods.Classes.ParserScripts;
 
 namespace CompilingMethods
