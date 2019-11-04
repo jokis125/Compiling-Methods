@@ -4,8 +4,8 @@ namespace CompilingMethods.Classes.ParserScripts
 {
     public class Param : INode
     {
-        private Token name;
-        private Token type;
+        private readonly Token name;
+        private readonly Token type;
 
         public Param(Token name, Token type)
         {

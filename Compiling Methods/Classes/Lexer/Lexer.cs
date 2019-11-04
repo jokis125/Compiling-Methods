@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using CompilingMethods.Classes.Exceptions;
@@ -8,20 +7,20 @@ namespace CompilingMethods.Classes.Lexer
 {
     public class Lexer
     {
-        private string buffer;
-        private char currentChar;
+        private readonly List<char> acceptableCharsAfterInt = new List<char>();
         private readonly string file;
         private readonly List<string> keywords = new List<string>();
-        private readonly List<char> acceptableCharsAfterInt = new List<char>();
+        private readonly List<Token> tokens = new List<Token>();
         private string allString;
+        private string buffer;
+        private char currentChar;
         private State currentState = State.Start;
         private int line = 1;
-        private int offset = 0;
-        private int strAndComStart = 0;
+        private int offset;
         private bool printTokens = true;
-        private readonly List<Token> tokens = new List<Token>();
-        private int tokenStart = 0;
         private bool running = true;
+        private int strAndComStart;
+        private int tokenStart;
 
 
         public Lexer(string input = "program.txt")
@@ -33,12 +32,12 @@ namespace CompilingMethods.Classes.Lexer
 
         public string GetScriptName()
         {
-            return Path.GetFullPath("..\\..\\..\\"+file);
+            return Path.GetFullPath("..\\..\\..\\" + file);
         }
 
-    public void GetText()
+        public void GetText()
         {
-            allString = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\"+file));
+            allString = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\..\\" + file));
         }
 
         public void StartLexer()
@@ -50,7 +49,7 @@ namespace CompilingMethods.Classes.Lexer
         {
             return tokens;
         }
-        
+
         private void LexAll()
         {
             while (running && offset < allString.Length)
@@ -70,22 +69,18 @@ namespace CompilingMethods.Classes.Lexer
                         CompleteToken(TokenType.Eof);
                         break;
                     case State.LitStr:
-                        PrintError(strAndComStart,$"Unterminated string");
+                        PrintError(strAndComStart, "Unterminated string");
                         printTokens = false;
                         break;
-                    case State t when (t == State.CommentMlExit || t == State.CommentMl):
-                        PrintError(strAndComStart,$"Unterminated comment");
+                    case State t when t == State.CommentMlExit || t == State.CommentMl:
+                        PrintError(strAndComStart, "Unterminated comment");
                         printTokens = false;
                         break;
                 }
 
                 if (printTokens)
-                {
                     for (var i = 0; i < tokens.Count; i++)
-                    {
                         tokens[i].PrintToken(i);
-                    }
-                }
             }
             else
             {
@@ -95,7 +90,7 @@ namespace CompilingMethods.Classes.Lexer
 
         private void PrintError(int badLine, string errorMsg)
         {
-            throw new LexerException($"{errorMsg} in {Path.GetFullPath("..\\..\\..\\"+file)}:line {badLine}");
+            throw new LexerException($"{errorMsg} in {Path.GetFullPath("..\\..\\..\\" + file)}:line {badLine}");
         }
 
         private void AddKeywords()
@@ -152,31 +147,31 @@ namespace CompilingMethods.Classes.Lexer
         {
             switch (currentChar)
             {
-                case char c when (Char.IsLetter(c)):
+                case char c when char.IsLetter(c):
                     BeginToken(State.Ident);
                     AddToBuffer(currentChar);
                     break;
-                case char c when (c == '_'):
+                case char c when c == '_':
                     BeginToken(State.Ident);
                     AddToBuffer(currentChar);
                     break;
-                case char c when (Char.IsDigit(c)):
+                case char c when char.IsDigit(c):
                     BeginToken(State.LitInt);
                     LexLitInt();
                     break;
-                case char c when (c == '"'):
+                case char c when c == '"':
                     BeginToken(State.LitStr);
                     strAndComStart = line;
                     break;
-                case char c when (c == '.'):
+                case char c when c == '.':
                     BeginToken(State.LitFloat);
                     AddToBuffer('0');
                     AddToBuffer('.');
                     break;
-                case char c when (c == '\n'):
+                case char c when c == '\n':
                     line++;
                     break;
-                case char c when (c == ' '):
+                case char c when c == ' ':
                     break;
                 case char c when c == '\r':
                     break;
@@ -185,7 +180,7 @@ namespace CompilingMethods.Classes.Lexer
                 case '\\':
                     BeginToken(State.LitEsc);
                     break;
-                case char c when c == '<' :
+                case char c when c == '<':
                     BeginToken(State.OpLess);
                     break;
                 case char c when c == '>':
@@ -197,7 +192,7 @@ namespace CompilingMethods.Classes.Lexer
                 case char c when c == '!':
                     BeginToken(State.OpNeg);
                     break;
-                case char c  when c == '&':
+                case char c when c == '&':
                     BeginToken(State.OpBinAnd);
                     break;
                 case char c when c == '|':
@@ -242,9 +237,8 @@ namespace CompilingMethods.Classes.Lexer
                 default:
                     running = false;
                     currentState = State.Unknown;
-                    PrintError(line,$"Unexpected char {currentChar}");
+                    PrintError(line, $"Unexpected char {currentChar}");
                     break;
-                    
             }
         }
 
@@ -252,17 +246,17 @@ namespace CompilingMethods.Classes.Lexer
         {
             switch (currentChar)
             {
-                case char c when (Char.IsDigit(c)):
+                case char c when char.IsDigit(c):
                     AddToBuffer(currentChar);
                     break;
-                case char c when (c == '.' || c == 'e'):
+                case char c when c == '.' || c == 'e':
                     AddToBuffer(currentChar);
                     currentState = State.LitFloat;
                     break;
-                case char c when (!char.IsDigit(c) && !acceptableCharsAfterInt.Contains(c)):
+                case char c when !char.IsDigit(c) && !acceptableCharsAfterInt.Contains(c):
                     running = false;
                     AddToBuffer(currentChar);
-                    PrintError(line,$"Bad int {buffer}");
+                    PrintError(line, $"Bad int {buffer}");
                     break;
                 default:
                     CompleteToken(TokenType.LitInt, false);
@@ -274,17 +268,16 @@ namespace CompilingMethods.Classes.Lexer
         {
             switch (currentChar)
             {
-                case char c when Char.IsDigit(c):
+                case char c when char.IsDigit(c):
                     AddToBuffer(currentChar);
                     break;
-                case char c when (c == 'e' && currentState != State.LitFloatExp):
+                case char c when c == 'e' && currentState != State.LitFloatExp:
                     AddToBuffer(currentChar);
                     currentState = State.LitFloatExp;
                     break;
                 default:
                     CompleteToken(TokenType.LitFloat, false);
                     break;
-                
             }
         }
 
@@ -292,13 +285,13 @@ namespace CompilingMethods.Classes.Lexer
         {
             switch (currentChar)
             {
-                case char c when (Char.IsLetter(c)):
+                case char c when char.IsLetter(c):
                     AddToBuffer(currentChar);
                     break;
-                case char c when (c == '_'):
+                case char c when c == '_':
                     AddToBuffer(currentChar);
                     break;
-                case char c when (Char.IsDigit(c)):
+                case char c when char.IsDigit(c):
                     AddToBuffer(currentChar);
                     break;
                 default:
@@ -371,10 +364,13 @@ namespace CompilingMethods.Classes.Lexer
                         CompleteToken(TokenType.False, false);
                         break;
                 }
+
                 buffer = "";
             }
             else
+            {
                 CompleteToken(TokenType.Ident, false);
+            }
         }
 
         private void LexLitStr()
@@ -415,6 +411,7 @@ namespace CompilingMethods.Classes.Lexer
                     running = false;
                     break;
             }
+
             currentState = State.LitStr;
         }
 
@@ -430,7 +427,7 @@ namespace CompilingMethods.Classes.Lexer
                     break;
             }
         }
-        
+
         private void LexLitOpMore()
         {
             switch (currentChar)
@@ -443,7 +440,7 @@ namespace CompilingMethods.Classes.Lexer
                     break;
             }
         }
-        
+
         private void LexLitOpAssign()
         {
             switch (currentChar)
@@ -456,7 +453,7 @@ namespace CompilingMethods.Classes.Lexer
                     break;
             }
         }
-        
+
         private void LexLitOpNotEqual()
         {
             switch (currentChar)
@@ -480,6 +477,7 @@ namespace CompilingMethods.Classes.Lexer
                     break;
             }
         }
+
         private void CommentStateMl()
         {
             switch (currentChar)
@@ -490,7 +488,7 @@ namespace CompilingMethods.Classes.Lexer
                 case '*':
                     currentState = State.CommentMlExit;
                     break;
-                case char c when (c == '/' && currentState == State.CommentMlExit):
+                case char c when c == '/' && currentState == State.CommentMlExit:
                     currentState = State.Start;
                     break;
                 default:
@@ -534,7 +532,7 @@ namespace CompilingMethods.Classes.Lexer
                     break;
             }
         }
-        
+
         private void LexLitOpSub()
         {
             switch (currentChar)
@@ -550,7 +548,7 @@ namespace CompilingMethods.Classes.Lexer
                     break;
             }
         }
-        
+
         private void LexLitOpMult()
         {
             switch (currentChar)
@@ -665,9 +663,9 @@ namespace CompilingMethods.Classes.Lexer
         private void CompleteToken(TokenType tokenState, bool advance = true)
         {
             dynamic data = 0;
-            if (int.TryParse(buffer, out int x))
+            if (int.TryParse(buffer, out var x))
                 data = x;
-            else if (float.TryParse(buffer, out float c))
+            else if (float.TryParse(buffer, out var c))
                 data = c;
             else
                 data = buffer;
@@ -677,7 +675,5 @@ namespace CompilingMethods.Classes.Lexer
             if (!advance)
                 offset--;
         }
-
-    
     }
 }

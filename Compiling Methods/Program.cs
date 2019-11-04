@@ -3,9 +3,9 @@ using CompilingMethods.Classes.ParserScripts;
 
 namespace CompilingMethods
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var lexer = new Lexer();
             lexer.GetText();

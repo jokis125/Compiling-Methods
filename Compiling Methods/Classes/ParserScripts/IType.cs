@@ -4,12 +4,11 @@ namespace CompilingMethods.Classes.ParserScripts
 {
     public interface IType : INode
     {
-        
     }
 
     public class TypePrim : IType
     {
-        private Token kind;
+        private readonly Token kind;
 
         public TypePrim(Token kind)
         {

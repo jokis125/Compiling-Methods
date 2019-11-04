@@ -6,35 +6,28 @@ namespace CompilingMethods.Classes.ParserScripts
 {
     public interface IExpression : INode
     {
-
     }
 
     public class ExprLit : IExpression
     {
-        private Token lit;
-
         public ExprLit(Token lit)
         {
-            this.lit = lit;
+            Lit = lit;
         }
+
+        public Token Lit { get; set; }
 
         public void PrintNode(AstPrinter p)
         {
-            p.Print("lit", lit);
-        }
-
-        public Token Lit
-        {
-            get => lit;
-            set => lit = value;
+            p.Print("lit", Lit);
         }
     }
 
     public class ExprBin : IExpression
     {
-        private TokenType op;
-        private IExpression left;
-        private IExpression right;
+        private readonly IExpression left;
+        private readonly TokenType op;
+        private readonly IExpression right;
 
         public ExprBin(TokenType op, IExpression left, IExpression right)
         {
@@ -53,8 +46,8 @@ namespace CompilingMethods.Classes.ParserScripts
 
     public class ExprFnCall : IExpression
     {
-        private Token ident;
-        private List<IExpression> args;
+        private readonly List<IExpression> args;
+        private readonly Token ident;
 
         public ExprFnCall(Token ident, List<IExpression> args)
         {

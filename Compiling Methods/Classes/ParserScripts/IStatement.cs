@@ -6,14 +6,13 @@ namespace CompilingMethods.Classes.ParserScripts
 {
     public interface IStatement : INode
     {
-        
     }
 
     public class StmtElif : IStatement
     {
-        private readonly StmtIf ifStmt;
         private readonly List<StmtIf> elifs;
         private readonly List<IStatement> elseBody;
+        private readonly StmtIf ifStmt;
 
         public StmtElif(StmtIf ifStmt, List<StmtIf> elifs, List<IStatement> elseBody)
         {
@@ -32,8 +31,8 @@ namespace CompilingMethods.Classes.ParserScripts
 
     public class StmtIf : IStatement
     {
-        private readonly IExpression condition;
         private readonly List<IStatement> body;
+        private readonly IExpression condition;
 
         public StmtIf(IExpression condition, List<IStatement> body)
         {
@@ -47,12 +46,12 @@ namespace CompilingMethods.Classes.ParserScripts
             p.Print("body", body);
         }
     }
-    
+
     public class StmtElse : IStatement
     {
         private readonly List<IStatement> body;
 
-        public StmtElse( List<IStatement> body)
+        public StmtElse(List<IStatement> body)
         {
             this.body = body;
         }
@@ -77,7 +76,7 @@ namespace CompilingMethods.Classes.ParserScripts
             p.Print("value", value);
         }
     }
-    
+
     public class StmtBreak : IStatement
     {
         public void PrintNode(AstPrinter p)
@@ -85,11 +84,11 @@ namespace CompilingMethods.Classes.ParserScripts
             p.Print("break", null);
         }
     }
-    
+
     public class StmtWhile : IStatement
     {
-        private readonly IExpression condition;
         private readonly List<IStatement> body;
+        private readonly IExpression condition;
 
         public StmtWhile(IExpression condition, List<IStatement> body)
         {
@@ -106,8 +105,8 @@ namespace CompilingMethods.Classes.ParserScripts
 
     public class StmtVar : IStatement
     {
-        private readonly Token type;
         private readonly Token ident;
+        private readonly Token type;
         private readonly IExpression value;
 
         public StmtVar(Token type, Token ident)
@@ -131,7 +130,7 @@ namespace CompilingMethods.Classes.ParserScripts
             p.Print("value", value);
         }
     }
-    
+
     public class StmtVarAssign : IStatement
     {
         private readonly Token ident;
@@ -153,11 +152,11 @@ namespace CompilingMethods.Classes.ParserScripts
             p.Print("value", value);
         }
     }
-    
+
     public class StmtFnCall : IStatement
     {
-        private readonly Token ident;
         private readonly List<IExpression> args;
+        private readonly Token ident;
 
         public StmtFnCall(Token ident, List<IExpression> args)
         {

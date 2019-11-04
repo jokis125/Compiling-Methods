@@ -12,6 +12,12 @@ namespace CompilingMethods.Classes.Lexer
             LineN = newLineNr;
         }
 
+        public TokenType State { get; }
+
+        public dynamic Value { get; }
+
+        public int LineN { get; }
+
         public void PrintToken(int count)
         {
             var id = (" " + count).PadRight(4);
@@ -20,11 +26,5 @@ namespace CompilingMethods.Classes.Lexer
             Console.WriteLine($"{id}|{ln}|{type}|{Value}");
             //Console.WriteLine($"{id}|{ln}|{type}|{value}");
         }
-
-        public TokenType State { get; }
-
-        public dynamic Value { get; }
-
-        public int LineN { get; }
     }
 }

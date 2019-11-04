@@ -8,48 +8,29 @@ namespace CompilingMethods.Classes.ParserScripts
 {
     public class AstPrinter
     {
-        private int indentLevel = 0;
+        private int indentLevel;
 
-        public void Print(string title, Object obj)
+        public void Print(string title, object obj)
         {
-            if(obj == null)
+            if (obj == null)
                 PrintText(title, "null");
             else if (obj is INode)
-            {
-                PrintNode(title, (INode)obj);
-            }
+                PrintNode(title, (INode) obj);
             else if (obj.GetType() == typeof(List<INode>))
-            {
-                PrintArray(title, (List<INode>)obj);
-            }
+                PrintArray(title, (List<INode>) obj);
             else if (obj.GetType() == typeof(List<IStatement>))
-            {
-                PrintArray<IStatement>(title, (List<IStatement>)obj);
-            }
+                PrintArray(title, (List<IStatement>) obj);
             else if (obj.GetType() == typeof(List<Param>))
-            {
-                PrintArray(title, (List<Param>)obj);
-            }
+                PrintArray(title, (List<Param>) obj);
             else if (obj.GetType() == typeof(List<IExpression>))
-            {
-                PrintArray(title, (List<IExpression>)obj);
-            }
+                PrintArray(title, (List<IExpression>) obj);
             else if (obj.GetType() == typeof(List<StmtIf>))
-            {
-                PrintArray(title, (List<StmtIf>)obj);
-            }
+                PrintArray(title, (List<StmtIf>) obj);
             else if (obj.GetType() == typeof(Token))
-            {
-                PrintToken(title, (Token)obj);
-            }
+                PrintToken(title, (Token) obj);
             else if (obj.GetType() == typeof(TokenType))
-            {
-                PrintTokenType(title, (TokenType)obj);
-            }
-            else if (obj is string)
-            {
-                PrintText(title, obj.ToString());
-            }
+                PrintTokenType(title, (TokenType) obj);
+            else if (obj is string) PrintText(title, obj.ToString());
         }
 
         private void PrintArray<T>(string title, List<T> array)
@@ -76,18 +57,18 @@ namespace CompilingMethods.Classes.ParserScripts
             indentLevel--;
         }
 
-        void PrintText(string title, string text)
+        private void PrintText(string title, string text)
         {
-            string prefix = String.Concat(Enumerable.Repeat("    ", indentLevel));
+            var prefix = string.Concat(Enumerable.Repeat("    ", indentLevel));
             Console.WriteLine($"{prefix}{title}: {text}");
         }
 
-        void PrintToken(string title, Token token)
+        private void PrintToken(string title, Token token)
         {
             PrintText(title, $"{token.State} ({token.Value})");
         }
-        
-        void PrintTokenType(string title, TokenType token)
+
+        private void PrintTokenType(string title, TokenType token)
         {
             PrintText(title, $"{token} ()");
         }
