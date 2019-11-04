@@ -18,16 +18,13 @@ namespace CompilingMethods.Classes.ParserScripts
             {
                 PrintNode(title, (INode)obj);
             }
-            /*else if (obj is IList &&
-                obj.GetType().IsGenericType &&
-                obj.GetType().GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>)))*/
             else if (obj.GetType() == typeof(List<INode>))
             {
                 PrintArray(title, (List<INode>)obj);
             }
             else if (obj.GetType() == typeof(List<IStatement>))
             {
-                PrintArray(title, (List<IStatement>)obj);
+                PrintArray<IStatement>(title, (List<IStatement>)obj);
             }
             else if (obj.GetType() == typeof(List<Param>))
             {
@@ -54,72 +51,8 @@ namespace CompilingMethods.Classes.ParserScripts
                 PrintText(title, obj.ToString());
             }
         }
-        
-        void PrintArray(string title, List<INode> array)
-        {
-            if (array.Count == 0)
-            {
-                PrintText(title, "[]");
-                return;
-            }
 
-            var index = 0;
-            foreach (var elem in array)
-            {
-                var elemTitle = $"{title}[{index++}]";
-                Print(elemTitle, elem);
-            }
-        }
-        
-        void PrintArray(string title, List<IStatement> array)
-        {
-            if (array.Count == 0)
-            {
-                PrintText(title, "[]");
-                return;
-            }
-
-            var index = 0;
-            foreach (var elem in array)
-            {
-                var elemTitle = $"{title}[{index++}]";
-                Print(elemTitle, elem);
-            }
-        }
-        
-        void PrintArray(string title, List<Param> array)
-        {
-            if (array.Count == 0)
-            {
-                PrintText(title, "[]");
-                return;
-            }
-
-            var index = 0;
-            foreach (var elem in array)
-            {
-                var elemTitle = $"{title}[{index++}]";
-                Print(elemTitle, elem);
-            }
-        }
-        
-        void PrintArray(string title, List<IExpression> array)
-        {
-            if (array.Count == 0)
-            {
-                PrintText(title, "[]");
-                return;
-            }
-
-            var index = 0;
-            foreach (var elem in array)
-            {
-                var elemTitle = $"{title}[{index++}]";
-                Print(elemTitle, elem);
-            }
-        }
-        
-        void PrintArray(string title, List<StmtIf> array)
+        private void PrintArray<T>(string title, List<T> array)
         {
             if (array.Count == 0)
             {
