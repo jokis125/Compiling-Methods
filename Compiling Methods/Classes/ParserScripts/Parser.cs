@@ -67,8 +67,11 @@ namespace CompilingMethods.Classes.ParserScripts
             while (tokens.Count != 0 && tokens[offset].State != TokenType.Eof)
             {
                 decls.Add(ParseDecl());
+                if (currentToken.State == TokenType.Separator)
+                    Expect(TokenType.Separator);
             }
-            if(tokens.Count != 0)
+
+            if (tokens.Count != 0)
                 Console.WriteLine("Yay!");
             return decls;
         }
