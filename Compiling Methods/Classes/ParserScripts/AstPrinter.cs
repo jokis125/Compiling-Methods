@@ -37,6 +37,10 @@ namespace CompilingMethods.Classes.ParserScripts
             {
                 PrintArray(title, (List<IExpression>)obj);
             }
+            else if (obj.GetType() == typeof(List<StmtIf>))
+            {
+                PrintArray(title, (List<StmtIf>)obj);
+            }
             else if (obj.GetType() == typeof(Token))
             {
                 PrintToken(title, (Token)obj);
@@ -100,6 +104,22 @@ namespace CompilingMethods.Classes.ParserScripts
         }
         
         void PrintArray(string title, List<IExpression> array)
+        {
+            if (array.Count == 0)
+            {
+                PrintText(title, "[]");
+                return;
+            }
+
+            var index = 0;
+            foreach (var elem in array)
+            {
+                var elemTitle = $"{title}[{index++}]";
+                Print(elemTitle, elem);
+            }
+        }
+        
+        void PrintArray(string title, List<StmtIf> array)
         {
             if (array.Count == 0)
             {

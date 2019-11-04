@@ -9,6 +9,27 @@ namespace CompilingMethods.Classes.ParserScripts
         
     }
 
+    public class StmtElif : IStatement
+    {
+        private readonly StmtIf ifStmt;
+        private readonly List<StmtIf> elifs;
+        private readonly List<IStatement> elseBody;
+
+        public StmtElif(StmtIf ifStmt, List<StmtIf> elifs, List<IStatement> elseBody)
+        {
+            this.ifStmt = ifStmt;
+            this.elifs = elifs;
+            this.elseBody = elseBody;
+        }
+
+        public void PrintNode(AstPrinter p)
+        {
+            p.Print("if Stmt", ifStmt);
+            p.Print("else if", elifs);
+            p.Print("else", elseBody);
+        }
+    }
+
     public class StmtIf : IStatement
     {
         private readonly IExpression condition;

@@ -308,7 +308,7 @@ namespace CompilingMethods.Classes.ParserScripts
             return statements;
         }
 
-        private IStatement ParseStmtIf()
+        private StmtIf ParseStmtIf()
         {
             Expect(TokenType.If);
             var cond = ParseExprParen();
@@ -316,9 +316,11 @@ namespace CompilingMethods.Classes.ParserScripts
             return new StmtIf(cond, body);
         }
 
-        private List<IStatement> ParseStmtElif()
+        private StmtElif ParseStmtElif()
         {
-            var stmts = new List<IStatement> {ParseStmtIf()};
+            var ifStmt = ParseStmtIf();
+            var elifs = new List<StmtIf>();
+            var elseObj = new List<IStatement>();
             while((Accept(TokenType.Else) != null))
             {
                 IExpression expression;
@@ -327,16 +329,19 @@ namespace CompilingMethods.Classes.ParserScripts
                 {
                     expression = ParseExprParen();
                     stmtBlock = ParseStmtBlock();
+                    elifs.Add(new StmtIf(expression, stmtBlock));
                 }
                 else
                 {
                     stmtBlock = ParseStmtBlock();
-                    stmts.Add(new StmtElse(stmtBlock));
+                    elseObj = stmtBlock;
+                    //stmts.Add(new StmtElse(stmtBlock));
+                    
                     break;
                 }
-                stmts.Add(new StmtIf(expression, stmtBlock));
+                //stmts.Add(new StmtIf(expression, stmtBlock));
             }
-            return stmts;
+            return new StmtElif(ifStmt, elifs, elseObj);
         }
 
         private StmtWhile ParseStmtWhile()
@@ -370,7 +375,7 @@ namespace CompilingMethods.Classes.ParserScripts
             switch (currentToken.State)
             {
                 case TokenType.If:
-                    list = ParseStmtElif();
+                    list.Add(ParseStmtElif());
                     return list;
                 case TokenType.While:
                     list.Add(ParseStmtWhile());
