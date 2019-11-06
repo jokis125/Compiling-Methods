@@ -46,28 +46,37 @@ namespace CompilingMethods.Classes.ParserScripts
             p.Print("body", body);
         }
     }
-    
 
-    public class StmtRet : IStatement
+    public class StmtKeywordExpr : IStatement
     {
-        private readonly IExpression value;
-
-        public StmtRet(IExpression value)
+        private Keyword kw;
+        private IExpression expr;
+        
+        public StmtKeywordExpr(Keyword kw, IExpression expr = null)
         {
-            this.value = value;
+            this.kw = kw;
+            this.expr = expr;
         }
 
         public void PrintNode(AstPrinter p)
         {
-            p.Print("value", value);
+            p.Print("keyword", kw);
+            p.Print("expr", expr);
         }
     }
-
-    public class StmtBreak : IStatement
+    
+    public class StmtKeyword : IStatement
     {
+        private Keyword kw;
+
+        public StmtKeyword(Keyword kw)
+        {
+            this.kw = kw;
+        }
+
         public void PrintNode(AstPrinter p)
         {
-            p.Print("break", null);
+            p.Print("keyword", kw);
         }
     }
 
@@ -92,17 +101,18 @@ namespace CompilingMethods.Classes.ParserScripts
     public class StmtVar : IStatement
     {
         private readonly Token ident;
-        private readonly Token type;
+        private readonly TypePrim type;
         private readonly IExpression value;
+        
 
-        public StmtVar(Token type, Token ident)
+        public StmtVar(TypePrim type, Token ident)
         {
             this.type = type;
             this.ident = ident;
             value = null;
         }
 
-        public StmtVar(Token type, Token ident, IExpression value)
+        public StmtVar(TypePrim type, Token ident, IExpression value)
         {
             this.type = type;
             this.ident = ident;
@@ -134,7 +144,6 @@ namespace CompilingMethods.Classes.ParserScripts
         public void PrintNode(AstPrinter p)
         {
             p.Print("name", ident);
-            p.Print("operator", op);
             p.Print("value", value);
         }
     }

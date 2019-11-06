@@ -5,9 +5,9 @@ namespace CompilingMethods.Classes.ParserScripts
     public class Param : INode
     {
         private readonly Token name;
-        private readonly Token type;
+        private readonly TypePrim type;
 
-        public Param(Token name, Token type)
+        public Param(Token name, TypePrim type)
         {
             this.name = name;
             this.type = type;

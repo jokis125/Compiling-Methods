@@ -61,7 +61,7 @@ namespace CompilingMethods.Classes.ParserScripts
             return null;
         }
 
-        public List<INode> ParseProgram()
+        public Root ParseProgram()
         {
             var decls = new List<INode>();
             while (tokens.Count != 0 && tokens[offset].State != TokenType.Eof)
@@ -70,40 +70,38 @@ namespace CompilingMethods.Classes.ParserScripts
                 if (currentToken.State == TokenType.Separator)
                     Expect(TokenType.Separator);
             }
-
-            if (tokens.Count != 0)
-                Console.WriteLine("Yay!");
-            return decls;
+            var body = new Body(decls);
+            return new Root(body);
         }
 
-        private ExprLit ParseLitInt()
+        private ExprConst ParseLitInt()
         {
-            return new ExprLit(Expect(TokenType.LitInt));
+            return new ExprConst(Expect(TokenType.LitInt));
         }
 
-        private ExprLit ParseLitFloat()
+        private ExprConst ParseLitFloat()
         {
-            return new ExprLit(Expect(TokenType.LitFloat));
+            return new ExprConst(Expect(TokenType.LitFloat));
         }
 
-        private ExprLit ParseLitStr()
+        private ExprConst ParseLitStr()
         {
-            return new ExprLit(Expect(TokenType.LitStr));
+            return new ExprConst(Expect(TokenType.LitStr));
         }
 
-        private ExprLit ParseTrue()
+        private ExprConst ParseTrue()
         {
-            return new ExprLit(Expect(TokenType.True));
+            return new ExprConst(Expect(TokenType.True));
         }
 
-        private ExprLit ParseFalse()
+        private ExprConst ParseFalse()
         {
-            return new ExprLit(Expect(TokenType.False));
+            return new ExprConst(Expect(TokenType.False));
         }
 
         private IExpression ParseExprVar(Token ident)
         {
-            var result = new ExprLit(Expect(TokenType.Ident));
+            var result = new ExprVar(Expect(TokenType.Ident));
             if (currentToken.State == TokenType.ParenOp)
                 return ParseExprCall(ident);
             return result;
@@ -157,16 +155,16 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             var result = ParseExprPrimary();
             while (Accept(TokenType.OpMul) != null || Accept(TokenType.OpDiv) != null)
-                result = new ExprBin(TokenType.OpMul, result, ParseExprPrimary());
+                result = new ExprBin(BinExpression.Mul, result, ParseExprPrimary());
             while (true)
                 if (Accept(TokenType.OpMul) != null)
-                    result = new ExprBin(TokenType.OpMul, result, ParseExprMul());
+                    result = new ExprBin(BinExpression.Mul, result, ParseExprMul());
                 else if (Accept(TokenType.OpDiv) != null)
-                    result = new ExprBin(TokenType.OpDiv, result, ParseExprMul());
+                    result = new ExprBin(BinExpression.Div, result, ParseExprMul());
                 else if (Accept(TokenType.OpAssMul) != null)
-                    result = new ExprBin(TokenType.OpAssMul, result, ParseExprMul());
+                    result = new ExprBin(BinExpression.AssMul, result, ParseExprMul());
                 else if (Accept(TokenType.OpAssDiv) != null)
-                    result = new ExprBin(TokenType.OpAssDiv, result, ParseExprMul());
+                    result = new ExprBin(BinExpression.AssDiv, result, ParseExprMul());
                 else
                     break;
 
@@ -178,13 +176,13 @@ namespace CompilingMethods.Classes.ParserScripts
             var result = ParseExprMul();
             while (true)
                 if (Accept(TokenType.OpAdd) != null)
-                    result = new ExprBin(TokenType.OpAdd, result, ParseExprMul());
+                    result = new ExprBin(BinExpression.Add, result, ParseExprMul());
                 else if (Accept(TokenType.OpAssAdd) != null)
-                    result = new ExprBin(TokenType.OpAssAdd, result, ParseExprMul());
+                    result = new ExprBin(BinExpression.AssAdd, result, ParseExprMul());
                 else if (Accept(TokenType.OpSub) != null)
-                    result = new ExprBin(TokenType.OpSub, result, ParseExprMul());
+                    result = new ExprBin(BinExpression.Sub, result, ParseExprMul());
                 else if (Accept(TokenType.OpAssSub) != null)
-                    result = new ExprBin(TokenType.OpAssSub, result, ParseExprMul());
+                    result = new ExprBin(BinExpression.AssSub, result, ParseExprMul());
                 else
                     break;
             return result;
@@ -195,9 +193,9 @@ namespace CompilingMethods.Classes.ParserScripts
             var result = ParseExprAdd();
             while (true)
                 if (Accept(TokenType.OpEqual) != null)
-                    result = new ExprBin(TokenType.OpEqual, result, ParseExprAdd());
+                    result = new ExprBin(BinExpression.Equal, result, ParseExprAdd());
                 else if (Accept(TokenType.OpNotEqual) != null)
-                    result = new ExprBin(TokenType.OpNotEqual, result, ParseExprAdd());
+                    result = new ExprBin(BinExpression.NotEqual, result, ParseExprAdd());
                 else
                     break;
 
@@ -209,13 +207,13 @@ namespace CompilingMethods.Classes.ParserScripts
             var result = ParseExprCmpEquals();
             while (true)
                 if (Accept(TokenType.OpLess) != null)
-                    result = new ExprBin(TokenType.OpLess, result, ParseExprCmpEquals());
+                    result = new ExprBin(BinExpression.Less, result, ParseExprCmpEquals());
                 else if (Accept(TokenType.OpMore) != null)
-                    result = new ExprBin(TokenType.OpMore, result, ParseExprCmpEquals());
+                    result = new ExprBin(BinExpression.More, result, ParseExprCmpEquals());
                 else if (Accept(TokenType.OpLessEqual) != null)
-                    result = new ExprBin(TokenType.OpLessEqual, result, ParseExprCmpEquals());
+                    result = new ExprBin(BinExpression.LessEqual, result, ParseExprCmpEquals());
                 else if (Accept(TokenType.OpMoreEqual) != null)
-                    result = new ExprBin(TokenType.OpMoreEqual, result, ParseExprCmpEquals());
+                    result = new ExprBin(BinExpression.MoreEqual, result, ParseExprCmpEquals());
                 else
                     break;
             return result;
@@ -226,7 +224,7 @@ namespace CompilingMethods.Classes.ParserScripts
             var result = ParseExprCmp();
             while (true)
                 if (Accept(TokenType.OpAnd) != null)
-                    result = new ExprBin(TokenType.OpAnd, result, ParseExprCmp());
+                    result = new ExprBin(BinExpression.And, result, ParseExprCmp());
                 else
                     break;
 
@@ -238,7 +236,7 @@ namespace CompilingMethods.Classes.ParserScripts
             var result = ParseExprAnd();
             while (true)
                 if (Accept(TokenType.OpOr) != null)
-                    result = new ExprBin(TokenType.OpOr, result, ParseExprAnd());
+                    result = new ExprBin(BinExpression.Or, result, ParseExprAnd());
                 else
                     break;
 
@@ -337,16 +335,21 @@ namespace CompilingMethods.Classes.ParserScripts
         private IStatement ParseStmtBreak()
         {
             Expect(TokenType.Break);
-            return new StmtBreak();
+            return new StmtKeyword(Keyword.Break);
+        }
+        
+        private IStatement ParseStmtContinue()
+        {
+            Expect(TokenType.Continue);
+            return new StmtKeyword(Keyword.Continue);
         }
 
         private IStatement ParseStmtReturn()
         {
             Expect(TokenType.Return);
-            if (currentToken.State == TokenType.Separator) return new StmtRet(null);
+            if (currentToken.State == TokenType.Separator) return new StmtKeywordExpr(Keyword.Return, null);
             var expr = ParseExpr();
-            return new StmtRet(expr);
-
+            return new StmtKeywordExpr(Keyword.Return, expr);
         }
 
 
@@ -363,6 +366,10 @@ namespace CompilingMethods.Classes.ParserScripts
                     return list;
                 case TokenType.Break:
                     list.Add(ParseStmtBreak());
+                    Expect(TokenType.Separator);
+                    return list;
+                case TokenType.Continue:
+                    list.Add(ParseStmtContinue());
                     Expect(TokenType.Separator);
                     return list;
                 case TokenType.Return:
@@ -389,11 +396,11 @@ namespace CompilingMethods.Classes.ParserScripts
             var type = ParseType();
             var name = Expect(TokenType.Ident);
             if (Accept(TokenType.Separator) != null)
-                return new StmtVar(name, type);
+                return new StmtVar(new TypePrim(type.State), name);
             return currentToken.State switch
             {
                 TokenType.ParenOp => ParseFnDecl(type, name.Value),
-                TokenType.OpAssign => new StmtVar(type, name, ParseAssign()),
+                TokenType.OpAssign => new StmtVar(new TypePrim(type.State), name, ParseAssign()),
                 _ => null
             };
         }
@@ -449,7 +456,7 @@ namespace CompilingMethods.Classes.ParserScripts
             var statementList = new List<IStatement>();
             if (Accept(TokenType.Separator) == null)
                 statementList = ParseStmtBlock();
-            return new DeclFn(type, name, paramList, statementList);
+            return new DeclFn(new TypePrim(type.State), name, paramList, statementList);
         }
 
         private StmtVar ParseVarDecl()
@@ -457,10 +464,10 @@ namespace CompilingMethods.Classes.ParserScripts
             var type = ParseType();
             var name = Expect(TokenType.Ident);
             if (Accept(TokenType.Separator) != null)
-                return new StmtVar(type, name);
+                return new StmtVar(new TypePrim(type.State), name);
             var exp = ParseAssign();
             Expect(TokenType.Separator);
-            return new StmtVar(type, name, exp);
+            return new StmtVar(new TypePrim(type.State), name, exp);
         }
 
         private IExpression ParseAssign()
@@ -491,7 +498,7 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             var type = ParseType();
             var name = Expect(TokenType.Ident);
-            return new Param(name, type);
+            return new Param(name, new TypePrim(type.State));
         }
 
         private List<Param> ParseParams()

@@ -28,8 +28,8 @@ namespace CompilingMethods.Classes.ParserScripts
                 PrintArray(title, (List<StmtIf>) obj);
             else if (obj.GetType() == typeof(Token))
                 PrintToken(title, (Token) obj);
-            else if (obj.GetType() == typeof(TokenType))
-                PrintTokenType(title, (TokenType) obj);
+            else if (obj is Enum @enum)
+                PrintEnum(title, @enum);
             else if (obj is string) PrintText(title, obj.ToString());
         }
 
@@ -51,7 +51,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         private void PrintNode(string title, INode node)
         {
-            PrintText(title, $"{node.GetType()}");
+            PrintText(title, $"{node.GetType().Name}");
             indentLevel++;
             node.PrintNode(this);
             indentLevel--;
@@ -68,9 +68,9 @@ namespace CompilingMethods.Classes.ParserScripts
             PrintText(title, $"{token.State} ({token.Value})");
         }
 
-        private void PrintTokenType(string title, TokenType token)
+        private void PrintEnum<T>(string title, T enumerator)
         {
-            PrintText(title, $"{token} ()");
+            PrintText(title, $"{enumerator}");
         }
     }
 }

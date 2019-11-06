@@ -13,9 +13,9 @@ namespace CompilingMethods.Classes.ParserScripts
         private readonly List<IStatement> body;
         private readonly string name;
         private readonly List<Param> parameters;
-        private readonly Token type;
+        private readonly TypePrim type;
 
-        public DeclFn(Token type, string name, List<Param> parameters, List<IStatement> body)
+        public DeclFn(TypePrim type, string name, List<Param> parameters, List<IStatement> body)
         {
             this.type = type;
             this.name = name;

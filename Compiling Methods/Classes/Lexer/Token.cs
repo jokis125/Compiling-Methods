@@ -23,7 +23,7 @@ namespace CompilingMethods.Classes.Lexer
             var id = (" " + count).PadRight(4);
             var ln = (" " + LineN).PadRight(5);
             var type = (" " + State).PadRight(16);
-            Console.WriteLine($"{id}|{ln}|{type}|{Value}");
+            Console.WriteLine($"{id}|{ln}|{type}|{Value.GetType().ToString()}|{Value}");
             //Console.WriteLine($"{id}|{ln}|{type}|{value}");
         }
     }

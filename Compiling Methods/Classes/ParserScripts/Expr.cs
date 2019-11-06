@@ -8,9 +8,9 @@ namespace CompilingMethods.Classes.ParserScripts
     {
     }
 
-    public class ExprLit : IExpression
+    public class ExprVar : IExpression
     {
-        public ExprLit(Token lit)
+        public ExprVar(Token lit)
         {
             Lit = lit;
         }
@@ -19,26 +19,41 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public void PrintNode(AstPrinter p)
         {
-            p.Print("lit", Lit);
+            p.Print("Var", Lit);
+        }
+    }
+
+    public class ExprConst : IExpression
+    {
+        private Token constant;
+
+        public ExprConst(Token constant)
+        {
+            this.constant = constant;
+        }
+
+        public void PrintNode(AstPrinter p)
+        {
+            p.Print("const", constant.Value.ToString());
         }
     }
 
     public class ExprBin : IExpression
     {
         private readonly IExpression left;
-        private readonly TokenType op;
+        private readonly BinExpression op;
         private readonly IExpression right;
 
-        public ExprBin(TokenType op, IExpression left, IExpression right)
+        public ExprBin(BinExpression op, IExpression left, IExpression right)
         {
-            this.op = op;
             this.left = left;
+            this.op = op;
             this.right = right;
         }
 
         public void PrintNode(AstPrinter p)
         {
-            p.Print("op", new Token(op, "", 1));
+            p.Print("op", op);
             p.Print("left", left);
             p.Print("right", right);
         }
