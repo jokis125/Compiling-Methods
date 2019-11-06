@@ -26,6 +26,8 @@ namespace CompilingMethods.Classes.ParserScripts
                 PrintArray(title, (List<IExpression>) obj);
             else if (obj.GetType() == typeof(List<StmtIf>))
                 PrintArray(title, (List<StmtIf>) obj);
+            else if (obj.GetType() == typeof(List<Branch>))
+                PrintArray(title, (List<Branch>)obj);
             else if (obj.GetType() == typeof(Token))
                 PrintToken(title, (Token) obj);
             else if (obj is Enum @enum)

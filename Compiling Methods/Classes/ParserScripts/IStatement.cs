@@ -22,18 +22,12 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public void PrintNode(AstPrinter p)
         {
-            p.Print("if expr", branches[0].Condition);
-            p.Print("if body", branches[0].Body);
-            foreach (var branch in branches.Skip(1))
-            {
-                p.Print("elif expr", branch.Condition);
-                p.Print("elif body", branch.Body);
-            }
+            p.Print("branch", branches);
             p.Print("else body", elseBody);
         }
     }
 
-    public class Branch
+    public class Branch : IStatement
     {
 
         public Branch(IExpression condition, List<IStatement> body)
@@ -45,6 +39,11 @@ namespace CompilingMethods.Classes.ParserScripts
         public IExpression Condition { get; }
         public List<IStatement> Body { get; }
 
+        public void PrintNode(AstPrinter p)
+        {
+            p.Print("Cond", Condition);
+            p.Print("Body", Body);
+        }
     }
 
     public class StmtKeywordExpr : IStatement
