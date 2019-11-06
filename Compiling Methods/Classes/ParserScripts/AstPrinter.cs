@@ -14,8 +14,8 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             if (obj == null)
                 PrintText(title, "null");
-            else if (obj is INode)
-                PrintNode(title, (INode) obj);
+            else if (obj is INode node)
+                PrintNode(title, node);
             else if (obj.GetType() == typeof(List<INode>))
                 PrintArray(title, (List<INode>) obj);
             else if (obj.GetType() == typeof(List<IStatement>))
@@ -33,7 +33,7 @@ namespace CompilingMethods.Classes.ParserScripts
             else if (obj is string) PrintText(title, obj.ToString());
         }
 
-        private void PrintArray<T>(string title, List<T> array)
+        private void PrintArray<T>(string title, IReadOnlyCollection<T> array)
         {
             if (array.Count == 0)
             {
