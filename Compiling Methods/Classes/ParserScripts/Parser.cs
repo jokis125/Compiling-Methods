@@ -287,19 +287,19 @@ namespace CompilingMethods.Classes.ParserScripts
             return statements;
         }
 
-        private StmtIf ParseStmtIf()
+        private Branch ParseStmtIf()
         {
             Expect(TokenType.If);
             var cond = ParseExprParen();
             var body = ParseStmtBlock();
-            return new StmtIf(cond, body);
+            return new Branch(cond, body);
         }
 
-        private StmtElif ParseStmtElif()
+        private StmtIf ParseStmtElif()
         {
-            var ifStmt = ParseStmtIf();
-            var elifs = new List<StmtIf>();
             var elseObj = new List<IStatement>();
+            var branches = new List<Branch>();
+            branches.Add(ParseStmtIf());
             while (Accept(TokenType.Else) != null)
             {
                 List<IStatement> stmtBlock;
@@ -307,21 +307,18 @@ namespace CompilingMethods.Classes.ParserScripts
                 {
                     var expression = ParseExprParen();
                     stmtBlock = ParseStmtBlock();
-                    elifs.Add(new StmtIf(expression, stmtBlock));
+                    branches.Add(new Branch(expression, stmtBlock));
                 }
                 else
                 {
                     stmtBlock = ParseStmtBlock();
                     elseObj = stmtBlock;
-                    //stmts.Add(new StmtElse(stmtBlock));
 
                     break;
                 }
-
-                //stmts.Add(new StmtIf(expression, stmtBlock));
             }
 
-            return new StmtElif(ifStmt, elifs, elseObj);
+            return new StmtIf(branches, elseObj);
         }
 
         private StmtWhile ParseStmtWhile()
@@ -347,7 +344,7 @@ namespace CompilingMethods.Classes.ParserScripts
         private IStatement ParseStmtReturn()
         {
             Expect(TokenType.Return);
-            if (currentToken.State == TokenType.Separator) return new StmtKeywordExpr(Keyword.Return, null);
+            if (currentToken.State == TokenType.Separator) return new StmtKeywordExpr(Keyword.Return);
             var expr = ParseExpr();
             return new StmtKeywordExpr(Keyword.Return, expr);
         }
@@ -399,8 +396,8 @@ namespace CompilingMethods.Classes.ParserScripts
                 return new StmtVar(new TypePrim(type.State), name);
             return currentToken.State switch
             {
-                TokenType.ParenOp => ParseFnDecl(type, name.Value),
-                TokenType.OpAssign => new StmtVar(new TypePrim(type.State), name, ParseAssign()),
+                TokenType.ParenOp => (INode) ParseFnDecl(type, name),
+                TokenType.OpAssign => new DeclVar(new TypePrim(type.State), name, ParseAssign()),
                 _ => null
             };
         }
@@ -450,7 +447,7 @@ namespace CompilingMethods.Classes.ParserScripts
             return new StmtFnCall(ident, args);
         }
 
-        private DeclFn ParseFnDecl(Token type, string name)
+        private DeclFn ParseFnDecl(Token type, Token name)
         {
             var paramList = ParseParams();
             var statementList = new List<IStatement>();

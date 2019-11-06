@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using CompilingMethods.Classes.Lexer;
 using CompilingMethods.Enums;
 
@@ -8,49 +9,48 @@ namespace CompilingMethods.Classes.ParserScripts
     {
     }
 
-    public class StmtElif : IStatement
+    public class StmtIf : IStatement
     {
-        private readonly List<StmtIf> elifs;
+        private readonly List<Branch> branches;
         private readonly List<IStatement> elseBody;
-        private readonly StmtIf ifStmt;
 
-        public StmtElif(StmtIf ifStmt, List<StmtIf> elifs, List<IStatement> elseBody)
+        public StmtIf(List<Branch> branches, List<IStatement> elseBody)
         {
-            this.ifStmt = ifStmt;
-            this.elifs = elifs;
+            this.branches = branches;
             this.elseBody = elseBody;
         }
 
         public void PrintNode(AstPrinter p)
         {
-            p.Print("if", ifStmt);
-            p.Print("else if", elifs);
-            p.Print("else", elseBody);
+            p.Print("if expr", branches[0].Condition);
+            p.Print("if body", branches[0].Body);
+            foreach (var branch in branches.Skip(1))
+            {
+                p.Print("elif expr", branch.Condition);
+                p.Print("elif body", branch.Body);
+            }
+            p.Print("else body", elseBody);
         }
     }
 
-    public class StmtIf : IStatement
+    public class Branch
     {
-        private readonly List<IStatement> body;
-        private readonly IExpression condition;
 
-        public StmtIf(IExpression condition, List<IStatement> body)
+        public Branch(IExpression condition, List<IStatement> body)
         {
-            this.condition = condition;
-            this.body = body;
+            Condition = condition;
+            Body = body;
         }
 
-        public void PrintNode(AstPrinter p)
-        {
-            p.Print("cond", condition);
-            p.Print("body", body);
-        }
+        public IExpression Condition { get; }
+        public List<IStatement> Body { get; }
+
     }
 
     public class StmtKeywordExpr : IStatement
     {
-        private Keyword kw;
-        private IExpression expr;
+        private readonly Keyword kw;
+        private readonly IExpression expr;
         
         public StmtKeywordExpr(Keyword kw, IExpression expr = null)
         {
@@ -67,7 +67,7 @@ namespace CompilingMethods.Classes.ParserScripts
     
     public class StmtKeyword : IStatement
     {
-        private Keyword kw;
+        private readonly Keyword kw;
 
         public StmtKeyword(Keyword kw)
         {
