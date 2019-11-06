@@ -13,6 +13,7 @@ namespace CompilingMethods.Classes.ParserScripts
         private readonly List<string> typeNames = new List<string>();
         private Token currentToken;
         private int offset;
+        private readonly Dictionary<TokenType, string> tokenToString = new Dictionary<TokenType, string>();
 
         public Parser(List<Token> newTokens, string filename)
         {
@@ -32,6 +33,24 @@ namespace CompilingMethods.Classes.ParserScripts
 
         }
 
+        private void PopulateDict()
+        {
+            tokenToString.Add(TokenType.OpAdd, "+");
+            tokenToString.Add(TokenType.OpAssAdd, "+=");
+            tokenToString.Add(TokenType.OpSub, "-");
+            tokenToString.Add(TokenType.OpAssSub, "-=");
+            tokenToString.Add(TokenType.Separator, ";");
+            tokenToString.Add(TokenType.OpDiv, "/");
+            tokenToString.Add(TokenType.OpMul, "*");
+            tokenToString.Add(TokenType.OpBinAnd, "&");
+            tokenToString.Add(TokenType.OpBinOr, "|");
+            tokenToString.Add(TokenType.OpComma, ",");
+            tokenToString.Add(TokenType.ParenOp, "(");
+            tokenToString.Add(TokenType.ParenCl, ")");
+            tokenToString.Add(TokenType.BracesCl, "}");
+            tokenToString.Add(TokenType.BracesOp, "{");
+        }
+
         private void FillTypeNames()
         {
             typeNames.Add("int");
@@ -44,7 +63,14 @@ namespace CompilingMethods.Classes.ParserScripts
 
         private void ThrowError(Token badToken)
         {
-            throw new BadTokenException($"Bad token {badToken.State} in {scriptName}:line {badToken.LineN}");
+            PopulateDict();
+            if (tokenToString.TryGetValue(badToken.State, out var result))
+                throw new BadTokenException($"Unexpected {result} in {scriptName}:line {badToken.LineN}");
+            if(badToken.State == TokenType.Ident)
+                throw new BadTokenException($"Unexpected " +
+                                            $"identifier \"{badToken.Value}\" in {scriptName}:line {badToken.LineN}");
+            throw new BadTokenException($"Unexpected Token {badToken.State} " +
+                                        $"in {scriptName}:line {badToken.LineN}");
         }
 
         private Token Expect(TokenType type)

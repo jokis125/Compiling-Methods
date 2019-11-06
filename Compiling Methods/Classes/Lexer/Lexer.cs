@@ -79,8 +79,6 @@ namespace CompilingMethods.Classes.Lexer
                 }
 
                 if (!printTokens) return;
-                for (var i = 0; i < tokens.Count; i++)
-                    tokens[i].PrintToken(i);
             }
             else
             {
