@@ -25,14 +25,11 @@ namespace CompilingMethods.Classes.ParserScripts
         private Token Accept(TokenType type)
         {
             currentToken = tokens[offset];
-            if (currentToken.State == type)
-            {
-                offset++;
-                currentToken = tokens[offset];
-                return tokens[offset - 1];
-            }
+            if (currentToken.State != type) return null;
+            offset++;
+            currentToken = tokens[offset];
+            return tokens[offset - 1];
 
-            return null;
         }
 
         private void FillTypeNames()
@@ -307,11 +304,10 @@ namespace CompilingMethods.Classes.ParserScripts
             var elseObj = new List<IStatement>();
             while (Accept(TokenType.Else) != null)
             {
-                IExpression expression;
                 List<IStatement> stmtBlock;
                 if (Accept(TokenType.If) != null)
                 {
-                    expression = ParseExprParen();
+                    var expression = ParseExprParen();
                     stmtBlock = ParseStmtBlock();
                     elifs.Add(new StmtIf(expression, stmtBlock));
                 }
@@ -347,17 +343,14 @@ namespace CompilingMethods.Classes.ParserScripts
         private IStatement ParseStmtReturn()
         {
             Expect(TokenType.Return);
-            if (currentToken.State != TokenType.Separator)
-            {
-                var expr = ParseExpr();
-                return new StmtRet(expr);
-            }
+            if (currentToken.State == TokenType.Separator) return new StmtRet(null);
+            var expr = ParseExpr();
+            return new StmtRet(expr);
 
-            return new StmtRet(null);
         }
 
 
-        private List<IStatement> ParseStatement()
+        private IEnumerable<IStatement> ParseStatement()
         {
             var list = new List<IStatement>();
             switch (currentToken.State)
@@ -397,15 +390,12 @@ namespace CompilingMethods.Classes.ParserScripts
             var name = Expect(TokenType.Ident);
             if (Accept(TokenType.Separator) != null)
                 return new StmtVar(name, type);
-            switch (currentToken.State)
+            return currentToken.State switch
             {
-                case TokenType.ParenOp:
-                    return ParseFnDecl(type, name.Value);
-                case TokenType.OpAssign:
-                    return new StmtVar(type, name, ParseAssign());
-            }
-
-            return null;
+                TokenType.ParenOp => ParseFnDecl(type, name.Value),
+                TokenType.OpAssign => new StmtVar(type, name, ParseAssign()),
+                _ => null
+            };
         }
 
         private IStatement ParseCall()

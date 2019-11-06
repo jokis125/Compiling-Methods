@@ -23,7 +23,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public void PrintNode(AstPrinter p)
         {
-            p.Print("if Stmt", ifStmt);
+            p.Print("if", ifStmt);
             p.Print("else if", elifs);
             p.Print("else", elseBody);
         }
@@ -46,21 +46,7 @@ namespace CompilingMethods.Classes.ParserScripts
             p.Print("body", body);
         }
     }
-
-    public class StmtElse : IStatement
-    {
-        private readonly List<IStatement> body;
-
-        public StmtElse(List<IStatement> body)
-        {
-            this.body = body;
-        }
-
-        public void PrintNode(AstPrinter p)
-        {
-            p.Print("body", body);
-        }
-    }
+    
 
     public class StmtRet : IStatement
     {

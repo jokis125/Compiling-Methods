@@ -15,7 +15,7 @@ namespace CompilingMethods.Classes.ParserScripts
             Lit = lit;
         }
 
-        public Token Lit { get; set; }
+        private Token Lit { get; }
 
         public void PrintNode(AstPrinter p)
         {

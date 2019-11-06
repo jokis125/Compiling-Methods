@@ -78,9 +78,9 @@ namespace CompilingMethods.Classes.Lexer
                         break;
                 }
 
-                if (printTokens)
-                    for (var i = 0; i < tokens.Count; i++)
-                        tokens[i].PrintToken(i);
+                if (!printTokens) return;
+                for (var i = 0; i < tokens.Count; i++)
+                    tokens[i].PrintToken(i);
             }
             else
             {
@@ -307,27 +307,27 @@ namespace CompilingMethods.Classes.Lexer
             {
                 switch (buffer)
                 {
-                    case string s when s == "if":
+                    case { } s when s == "if":
                         buffer = "";
                         CompleteToken(TokenType.If, false);
                         break;
-                    case string s when s == "else":
+                    case { } s when s == "else":
                         buffer = "";
                         CompleteToken(TokenType.Else, false);
                         break;
-                    case string s when s == "return":
+                    case { } s when s == "return":
                         buffer = "";
                         CompleteToken(TokenType.Return, false);
                         break;
-                    case string s when s == "continue":
+                    case { } s when s == "continue":
                         buffer = "";
                         CompleteToken(TokenType.Continue, false);
                         break;
-                    case string s when s == "break":
+                    case { } s when s == "break":
                         buffer = "";
                         CompleteToken(TokenType.Break, false);
                         break;
-                    case string s when s == "while":
+                    case { } s when s == "while":
                         buffer = "";
                         CompleteToken(TokenType.While, false);
                         break;
