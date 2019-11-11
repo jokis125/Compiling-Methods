@@ -62,12 +62,12 @@ namespace CompilingMethods.Classes.ParserScripts
         }
     }
 
-    public class StmtKeywordExpr : IStatement
+    public class StmtReturn : IStatement
     {
         private readonly Token kw;
         private readonly IExpression expr;
 
-        public StmtKeywordExpr(Token kw, IExpression expr = null)
+        public StmtReturn(Token kw, IExpression expr = null)
         {
             this.kw = kw;
             this.expr = expr;
@@ -79,13 +79,12 @@ namespace CompilingMethods.Classes.ParserScripts
             p.Print("expr", expr);
         }
     }
-    
-    public class StmtKeyword : IStatement
+
+    public class StmtBreak : IStatement
     {
-        //private readonly Keyword kw; //TOKEN
         private readonly Token kw;
 
-        public StmtKeyword(Token kw)
+        public StmtBreak(Token kw)
         {
             this.kw = kw;
         }
@@ -95,6 +94,23 @@ namespace CompilingMethods.Classes.ParserScripts
             p.Print("keyword", kw);
         }
     }
+    
+    public class StmtContinue : IStatement
+    {
+        private readonly Token kw;
+
+        public StmtContinue(Token kw)
+        {
+            this.kw = kw;
+        }
+
+        public void PrintNode(AstPrinter p)
+        {
+            p.Print("keyword", kw);
+        }
+    }
+    
+    
 
     public class StmtWhile : IStatement
     {

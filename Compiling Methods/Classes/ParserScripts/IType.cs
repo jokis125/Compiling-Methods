@@ -10,12 +10,13 @@ namespace CompilingMethods.Classes.ParserScripts
 
     public class TypePrim : IType //TOSWITCH
     {
-        private Token typeToken;
+        private Token token;
         private readonly PrimType kind;
 
-        public TypePrim(TokenType kind)
+        public TypePrim(Token token)
         {
-            this.kind = kind switch
+            this.token = token;
+            this.kind = token.State switch
             {
                 TokenType.Int => PrimType.Int,
                 TokenType.Char => PrimType.Char,

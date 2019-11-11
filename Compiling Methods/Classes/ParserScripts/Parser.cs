@@ -321,7 +321,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         private StmtIf ParseStmtElif()
         {
-            var elseObj = new StatementBlock(null);
+            StatementBlock elseObj = null;
             var branches = new List<Branch>();
             branches.Add(ParseStmtIf());
             while (Accept(TokenType.Else) != null)
@@ -355,20 +355,20 @@ namespace CompilingMethods.Classes.ParserScripts
 
         private IStatement ParseStmtBreak()
         {
-            return new StmtKeyword(Expect(TokenType.Break));
+            return new StmtBreak(Expect(TokenType.Break));
         }
         
         private IStatement ParseStmtContinue()
         {
-            return new StmtKeyword(Expect(TokenType.Continue));
+            return new StmtContinue(Expect(TokenType.Continue));
         }
 
         private IStatement ParseStmtReturn()
         {
             var ret = Expect(TokenType.Return);
-            if (currentToken.State == TokenType.Separator) return new StmtKeywordExpr(ret);
+            if (currentToken.State == TokenType.Separator) return new StmtReturn(ret);
             var expr = ParseExpr();
-            return new StmtKeywordExpr(ret, expr);
+            return new StmtReturn(ret, expr);
         }
 
 
@@ -415,11 +415,11 @@ namespace CompilingMethods.Classes.ParserScripts
             var type = ParseType();
             var name = Expect(TokenType.Ident);
             if (Accept(TokenType.Separator) != null)
-                return new StmtVar(new TypePrim(type.State), name);
+                return new StmtVar(new TypePrim(type), name);
             return currentToken.State switch
             {
                 TokenType.ParenOp => (INode) ParseFnDecl(type, name),
-                TokenType.OpAssign => new DeclVar(new TypePrim(type.State), name, ParseAssign()),
+                TokenType.OpAssign => new DeclVar(new TypePrim(type), name, ParseAssign()),
                 _ => null
             };
         }
@@ -475,7 +475,7 @@ namespace CompilingMethods.Classes.ParserScripts
             var statementList = new List<IStatement>();
             if (Accept(TokenType.Separator) == null)
                 statementList = ParseStmtBlock();
-            return new DeclFn(new TypePrim(type.State), name, paramList, statementList);
+            return new DeclFn(new TypePrim(type), name, paramList, statementList);
         }
 
         private StmtVar ParseVarDecl()
@@ -483,10 +483,10 @@ namespace CompilingMethods.Classes.ParserScripts
             var type = ParseType();
             var name = Expect(TokenType.Ident);
             if (Accept(TokenType.Separator) != null)
-                return new StmtVar(new TypePrim(type.State), name);
+                return new StmtVar(new TypePrim(type), name);
             var exp = ParseAssign();
             Expect(TokenType.Separator);
-            return new StmtVar(new TypePrim(type.State), name, exp);
+            return new StmtVar(new TypePrim(type), name, exp);
         }
 
         private IExpression ParseAssign()
@@ -517,7 +517,7 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             var type = ParseType();
             var name = Expect(TokenType.Ident);
-            return new Param(name, new TypePrim(type.State));
+            return new Param(name, new TypePrim(type));
         }
 
         private List<Param> ParseParams()
