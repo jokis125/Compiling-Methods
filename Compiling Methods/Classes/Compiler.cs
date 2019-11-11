@@ -17,7 +17,7 @@ namespace CompilingMethods.Classes
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                throw;
+                //throw;
                 return;
             }
             
@@ -30,7 +30,7 @@ namespace CompilingMethods.Classes
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                throw;
+                //throw;
                 return;
             }
             var printer = new AstPrinter();

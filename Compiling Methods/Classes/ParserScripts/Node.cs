@@ -9,32 +9,19 @@ namespace CompilingMethods.Classes.ParserScripts
 
     public class Root : INode
     {
-        private Body body;
+        private readonly List<INode> decls;
 
-        public Root(Body body)
+        public Root(List<INode> decls)
         {
-            this.body = body;
+            this.decls = decls;
         }
 
         public void PrintNode(AstPrinter p)
         {
-            p.Print("Body", body);
+            p.Print("Declare", decls);
         }
     }
 
-    public class Body : INode
-    {
-        private List<INode> declares;
 
-        public Body(List<INode> declares)
-        {
-            this.declares = declares;
-        }
-
-        public void PrintNode(AstPrinter p)
-        {
-            p.Print("Declares", declares);
-        }
-    }
     
 }

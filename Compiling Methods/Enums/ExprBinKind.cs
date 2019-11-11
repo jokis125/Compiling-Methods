@@ -1,6 +1,6 @@
 namespace CompilingMethods.Enums
 {
-    public enum BinExpression
+    public enum ExprBinKind
     {
         Add,
         AssAdd,

@@ -41,10 +41,10 @@ namespace CompilingMethods.Classes.ParserScripts
     public class ExprBin : IExpression
     {
         private readonly IExpression left;
-        private readonly BinExpression op;
+        private readonly ExprBinKind op;
         private readonly IExpression right;
 
-        public ExprBin(BinExpression op, IExpression left, IExpression right)
+        public ExprBin(ExprBinKind op, IExpression left, IExpression right)
         {
             this.left = left;
             this.op = op;

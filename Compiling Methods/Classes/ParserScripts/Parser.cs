@@ -65,12 +65,11 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             PopulateDict();
             if (tokenToString.TryGetValue(badToken.State, out var result))
-                throw new BadTokenException($"Unexpected {result} in {scriptName}:line {badToken.LineN}");
+                throw new BadTokenException($"{scriptName}:{badToken.LineN} Error: Unexpected {result}");
             if(badToken.State == TokenType.Ident)
-                throw new BadTokenException($"Unexpected " +
-                                            $"identifier \"{badToken.Value}\" in {scriptName}:line {badToken.LineN}");
-            throw new BadTokenException($"Unexpected Token {badToken.State} " +
-                                        $"in {scriptName}:line {badToken.LineN}");
+                throw new BadTokenException($" in {scriptName}:{badToken.LineN} Error: Unexpected " +
+                                            $"identifier \"{badToken.Value}\"");
+            throw new BadTokenException($"in {scriptName}:{badToken.LineN} Error: Unexpected Token {badToken.State}");
         }
 
         private Token Expect(TokenType type)
@@ -96,8 +95,7 @@ namespace CompilingMethods.Classes.ParserScripts
                 if (currentToken.State == TokenType.Separator)
                     Expect(TokenType.Separator);
             }
-            var body = new Body(decls);
-            return new Root(body);
+            return new Root(decls);
         }
 
         private ExprConst ParseLitInt()
@@ -181,16 +179,16 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             var result = ParseExprPrimary();
             while (Accept(TokenType.OpMul) != null || Accept(TokenType.OpDiv) != null)
-                result = new ExprBin(BinExpression.Mul, result, ParseExprPrimary());
+                result = new ExprBin(ExprBinKind.Mul, result, ParseExprPrimary());
             while (true)
                 if (Accept(TokenType.OpMul) != null)
-                    result = new ExprBin(BinExpression.Mul, result, ParseExprMul());
+                    result = new ExprBin(ExprBinKind.Mul, result, ParseExprMul());
                 else if (Accept(TokenType.OpDiv) != null)
-                    result = new ExprBin(BinExpression.Div, result, ParseExprMul());
+                    result = new ExprBin(ExprBinKind.Div, result, ParseExprMul());
                 else if (Accept(TokenType.OpAssMul) != null)
-                    result = new ExprBin(BinExpression.AssMul, result, ParseExprMul());
+                    result = new ExprBin(ExprBinKind.AssMul, result, ParseExprMul());
                 else if (Accept(TokenType.OpAssDiv) != null)
-                    result = new ExprBin(BinExpression.AssDiv, result, ParseExprMul());
+                    result = new ExprBin(ExprBinKind.AssDiv, result, ParseExprMul());
                 else
                     break;
 
@@ -202,13 +200,13 @@ namespace CompilingMethods.Classes.ParserScripts
             var result = ParseExprMul();
             while (true)
                 if (Accept(TokenType.OpAdd) != null)
-                    result = new ExprBin(BinExpression.Add, result, ParseExprMul());
+                    result = new ExprBin(ExprBinKind.Add, result, ParseExprMul());
                 else if (Accept(TokenType.OpAssAdd) != null)
-                    result = new ExprBin(BinExpression.AssAdd, result, ParseExprMul());
+                    result = new ExprBin(ExprBinKind.AssAdd, result, ParseExprMul());
                 else if (Accept(TokenType.OpSub) != null)
-                    result = new ExprBin(BinExpression.Sub, result, ParseExprMul());
+                    result = new ExprBin(ExprBinKind.Sub, result, ParseExprMul());
                 else if (Accept(TokenType.OpAssSub) != null)
-                    result = new ExprBin(BinExpression.AssSub, result, ParseExprMul());
+                    result = new ExprBin(ExprBinKind.AssSub, result, ParseExprMul());
                 else
                     break;
             return result;
@@ -219,9 +217,9 @@ namespace CompilingMethods.Classes.ParserScripts
             var result = ParseExprAdd();
             while (true)
                 if (Accept(TokenType.OpEqual) != null)
-                    result = new ExprBin(BinExpression.Equal, result, ParseExprAdd());
+                    result = new ExprBin(ExprBinKind.Equal, result, ParseExprAdd());
                 else if (Accept(TokenType.OpNotEqual) != null)
-                    result = new ExprBin(BinExpression.NotEqual, result, ParseExprAdd());
+                    result = new ExprBin(ExprBinKind.NotEqual, result, ParseExprAdd());
                 else
                     break;
 
@@ -233,13 +231,13 @@ namespace CompilingMethods.Classes.ParserScripts
             var result = ParseExprCmpEquals();
             while (true)
                 if (Accept(TokenType.OpLess) != null)
-                    result = new ExprBin(BinExpression.Less, result, ParseExprCmpEquals());
+                    result = new ExprBin(ExprBinKind.Less, result, ParseExprCmpEquals());
                 else if (Accept(TokenType.OpMore) != null)
-                    result = new ExprBin(BinExpression.More, result, ParseExprCmpEquals());
+                    result = new ExprBin(ExprBinKind.More, result, ParseExprCmpEquals());
                 else if (Accept(TokenType.OpLessEqual) != null)
-                    result = new ExprBin(BinExpression.LessEqual, result, ParseExprCmpEquals());
+                    result = new ExprBin(ExprBinKind.LessEqual, result, ParseExprCmpEquals());
                 else if (Accept(TokenType.OpMoreEqual) != null)
-                    result = new ExprBin(BinExpression.MoreEqual, result, ParseExprCmpEquals());
+                    result = new ExprBin(ExprBinKind.MoreEqual, result, ParseExprCmpEquals());
                 else
                     break;
             return result;
@@ -250,7 +248,7 @@ namespace CompilingMethods.Classes.ParserScripts
             var result = ParseExprCmp();
             while (true)
                 if (Accept(TokenType.OpAnd) != null)
-                    result = new ExprBin(BinExpression.And, result, ParseExprCmp());
+                    result = new ExprBin(ExprBinKind.And, result, ParseExprCmp());
                 else
                     break;
 
@@ -262,7 +260,7 @@ namespace CompilingMethods.Classes.ParserScripts
             var result = ParseExprAnd();
             while (true)
                 if (Accept(TokenType.OpOr) != null)
-                    result = new ExprBin(BinExpression.Or, result, ParseExprAnd());
+                    result = new ExprBin(ExprBinKind.Or, result, ParseExprAnd());
                 else
                     break;
 
@@ -318,12 +316,12 @@ namespace CompilingMethods.Classes.ParserScripts
             Expect(TokenType.If);
             var cond = ParseExprParen();
             var body = ParseStmtBlock();
-            return new Branch(cond, body);
+            return new Branch(cond, new StatementBlock(body));
         }
 
         private StmtIf ParseStmtElif()
         {
-            var elseObj = new List<IStatement>();
+            var elseObj = new StatementBlock(null);
             var branches = new List<Branch>();
             branches.Add(ParseStmtIf());
             while (Accept(TokenType.Else) != null)
@@ -333,12 +331,12 @@ namespace CompilingMethods.Classes.ParserScripts
                 {
                     var expression = ParseExprParen();
                     stmtBlock = ParseStmtBlock();
-                    branches.Add(new Branch(expression, stmtBlock));
+                    branches.Add(new Branch(expression, new StatementBlock(stmtBlock)));
                 }
                 else
                 {
                     stmtBlock = ParseStmtBlock();
-                    elseObj = stmtBlock;
+                    elseObj = new StatementBlock(stmtBlock);
 
                     break;
                 }
@@ -352,27 +350,25 @@ namespace CompilingMethods.Classes.ParserScripts
             Expect(TokenType.While);
             var cond = ParseExprParen();
             var body = ParseStmtBlock();
-            return new StmtWhile(cond, body);
+            return new StmtWhile(cond, new StatementBlock(body));
         }
 
         private IStatement ParseStmtBreak()
         {
-            Expect(TokenType.Break);
-            return new StmtKeyword(Keyword.Break);
+            return new StmtKeyword(Expect(TokenType.Break));
         }
         
         private IStatement ParseStmtContinue()
         {
-            Expect(TokenType.Continue);
-            return new StmtKeyword(Keyword.Continue);
+            return new StmtKeyword(Expect(TokenType.Continue));
         }
 
         private IStatement ParseStmtReturn()
         {
-            Expect(TokenType.Return);
-            if (currentToken.State == TokenType.Separator) return new StmtKeywordExpr(Keyword.Return);
+            var ret = Expect(TokenType.Return);
+            if (currentToken.State == TokenType.Separator) return new StmtKeywordExpr(ret);
             var expr = ParseExpr();
-            return new StmtKeywordExpr(Keyword.Return, expr);
+            return new StmtKeywordExpr(ret, expr);
         }
 
 
@@ -463,14 +459,14 @@ namespace CompilingMethods.Classes.ParserScripts
             if (currentToken.State == TokenType.ParenCl)
             {
                 Expect(TokenType.ParenCl);
-                return new StmtFnCall(ident);
+                return new StmtFnCall(new ExprFnCall(ident, args));
             }
 
             args.Add(ParseExpr());
             while (Accept(TokenType.OpComma) != null) args.Add(ParseExpr());
 
             Expect(TokenType.ParenCl);
-            return new StmtFnCall(ident, args);
+            return new StmtFnCall(new ExprFnCall(ident, args));
         }
 
         private DeclFn ParseFnDecl(Token type, Token name)

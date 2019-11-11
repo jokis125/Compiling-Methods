@@ -5,6 +5,7 @@ using CompilingMethods.Enums;
 
 namespace CompilingMethods.Classes.ParserScripts
 {
+    //NODE STATEMENTBLOCK
     public interface IStatement : INode
     {
     }
@@ -12,9 +13,9 @@ namespace CompilingMethods.Classes.ParserScripts
     public class StmtIf : IStatement
     {
         private readonly List<Branch> branches;
-        private readonly List<IStatement> elseBody;
+        private readonly StatementBlock elseBody;
 
-        public StmtIf(List<Branch> branches, List<IStatement> elseBody)
+        public StmtIf(List<Branch> branches, StatementBlock elseBody)
         {
             this.branches = branches;
             this.elseBody = elseBody;
@@ -27,17 +28,32 @@ namespace CompilingMethods.Classes.ParserScripts
         }
     }
 
+    public class StatementBlock : IStatement
+    {
+        private readonly List<IStatement> statements;
+
+        public StatementBlock(List<IStatement> statements)
+        {
+            this.statements = statements;
+        }
+
+        public void PrintNode(AstPrinter p)
+        {
+            p.Print("statement", statements);
+        }
+    }
+
     public class Branch : IStatement
     {
 
-        public Branch(IExpression condition, List<IStatement> body)
+        public Branch(IExpression condition, StatementBlock body)
         {
             Condition = condition;
             Body = body;
         }
 
         public IExpression Condition { get; }
-        public List<IStatement> Body { get; }
+        public StatementBlock Body { get; }
 
         public void PrintNode(AstPrinter p)
         {
@@ -48,10 +64,10 @@ namespace CompilingMethods.Classes.ParserScripts
 
     public class StmtKeywordExpr : IStatement
     {
-        private readonly Keyword kw;
+        private readonly Token kw;
         private readonly IExpression expr;
-        
-        public StmtKeywordExpr(Keyword kw, IExpression expr = null)
+
+        public StmtKeywordExpr(Token kw, IExpression expr = null)
         {
             this.kw = kw;
             this.expr = expr;
@@ -66,9 +82,10 @@ namespace CompilingMethods.Classes.ParserScripts
     
     public class StmtKeyword : IStatement
     {
-        private readonly Keyword kw;
+        //private readonly Keyword kw; //TOKEN
+        private readonly Token kw;
 
-        public StmtKeyword(Keyword kw)
+        public StmtKeyword(Token kw)
         {
             this.kw = kw;
         }
@@ -81,10 +98,10 @@ namespace CompilingMethods.Classes.ParserScripts
 
     public class StmtWhile : IStatement
     {
-        private readonly List<IStatement> body;
+        private readonly StatementBlock body;
         private readonly IExpression condition;
 
-        public StmtWhile(IExpression condition, List<IStatement> body)
+        public StmtWhile(IExpression condition, StatementBlock body)
         {
             this.condition = condition;
             this.body = body;
@@ -147,27 +164,18 @@ namespace CompilingMethods.Classes.ParserScripts
         }
     }
 
-    public class StmtFnCall : IStatement
+    public class StmtFnCall : IStatement //TO-EXPRESSION
     {
-        private readonly List<IExpression> args;
-        private readonly Token ident;
+        private readonly IExpression fnCall;
 
-        public StmtFnCall(Token ident, List<IExpression> args)
+        public StmtFnCall(ExprFnCall fnCall)
         {
-            this.ident = ident;
-            this.args = args;
-        }
-
-        public StmtFnCall(Token ident)
-        {
-            this.ident = ident;
-            args = new List<IExpression>();
+            this.fnCall = fnCall;
         }
 
         public void PrintNode(AstPrinter p)
         {
-            p.Print("ident", ident);
-            p.Print("args", args);
+            p.Print("call", fnCall);
         }
     }
 }
