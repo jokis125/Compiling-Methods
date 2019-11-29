@@ -1,2 +1,11 @@
-void asas()
-{}
+void asas(string a, int c)
+{
+    string b;
+    if (b < 5)
+    {
+    }
+}
+
+void square()
+{
+}

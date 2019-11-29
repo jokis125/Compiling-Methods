@@ -1,3 +1,4 @@
+using CompilingMethods.Classes.Compiler;
 using CompilingMethods.Classes.Lexer;
 
 namespace CompilingMethods.Classes.ParserScripts
@@ -6,6 +7,7 @@ namespace CompilingMethods.Classes.ParserScripts
     {
         private readonly Token name;
         private readonly TypePrim type;
+        private int stackSlot;
 
         public Param(Token name, TypePrim type)
         {
@@ -17,6 +19,17 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             p.Print("type", type);
             p.Print("name", name);
+        }
+
+        public void ResolveNames(Scope scope)
+        {
+            stackSlot = GlobalVars.StackSlotIndex++;
+            scope.Add(name, this);
+        }
+
+        public TypePrim CheckTypes()
+        {
+            return null;
         }
     }
 }

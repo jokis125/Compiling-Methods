@@ -88,7 +88,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public Root ParseProgram()
         {
-            var decls = new List<INode>();
+            var decls = new List<IDeclares>();
             while (tokens.Count != 0 && tokens[offset].State != TokenType.Eof)
             {
                 decls.Add(ParseDecl());
@@ -316,12 +316,12 @@ namespace CompilingMethods.Classes.ParserScripts
             Expect(TokenType.If);
             var cond = ParseExprParen();
             var body = ParseStmtBlock();
-            return new Branch(cond, new StatementBlock(body));
+            return new Branch(cond, new StmtBlock(body));
         }
 
         private StmtIf ParseStmtElif()
         {
-            StatementBlock elseObj = null;
+            StmtBlock elseObj = null;
             var branches = new List<Branch>();
             branches.Add(ParseStmtIf());
             while (Accept(TokenType.Else) != null)
@@ -331,12 +331,12 @@ namespace CompilingMethods.Classes.ParserScripts
                 {
                     var expression = ParseExprParen();
                     stmtBlock = ParseStmtBlock();
-                    branches.Add(new Branch(expression, new StatementBlock(stmtBlock)));
+                    branches.Add(new Branch(expression, new StmtBlock(stmtBlock)));
                 }
                 else
                 {
                     stmtBlock = ParseStmtBlock();
-                    elseObj = new StatementBlock(stmtBlock);
+                    elseObj = new StmtBlock(stmtBlock);
 
                     break;
                 }
@@ -350,7 +350,7 @@ namespace CompilingMethods.Classes.ParserScripts
             Expect(TokenType.While);
             var cond = ParseExprParen();
             var body = ParseStmtBlock();
-            return new StmtWhile(cond, new StatementBlock(body));
+            return new StmtWhile(cond, new StmtBlock(body));
         }
 
         private IStatement ParseStmtBreak()
@@ -410,15 +410,15 @@ namespace CompilingMethods.Classes.ParserScripts
             return null;
         }
 
-        private INode ParseDecl()
+        private IDeclares ParseDecl()
         {
             var type = ParseType();
             var name = Expect(TokenType.Ident);
             if (Accept(TokenType.Separator) != null)
-                return new StmtVar(new TypePrim(type), name);
+                return new DeclVar(new TypePrim(type), name);
             return currentToken.State switch
             {
-                TokenType.ParenOp => (INode) ParseFnDecl(type, name),
+                TokenType.ParenOp => (IDeclares) ParseFnDecl(type, name),
                 TokenType.OpAssign => new DeclVar(new TypePrim(type), name, ParseAssign()),
                 _ => null
             };

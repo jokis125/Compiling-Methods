@@ -1,4 +1,5 @@
 ﻿using CompilingMethods.Classes;
+using CompilingMethods.Classes.Compiler;
 
 namespace CompilingMethods
 {

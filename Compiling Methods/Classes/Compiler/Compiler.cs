@@ -1,7 +1,7 @@
 using System;
 using CompilingMethods.Classes.ParserScripts;
 
-namespace CompilingMethods.Classes
+namespace CompilingMethods.Classes.Compiler
 {
     public class Compiler
     {
@@ -35,6 +35,21 @@ namespace CompilingMethods.Classes
             }
             var printer = new AstPrinter();
             printer.Print("root", root);
+
+            Scope rootScope = new Scope(null, lexer.GetScriptName());
+            try
+            {
+                root.ResolveNames(rootScope);
+                root.CheckTypes();
+            }
+            
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+            }
+            
+            
         }
     }
 }

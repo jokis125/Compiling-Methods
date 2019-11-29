@@ -1,10 +1,13 @@
 using System.Collections.Generic;
+using CompilingMethods.Classes.Compiler;
 using CompilingMethods.Classes.Lexer;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace CompilingMethods.Classes.ParserScripts
 {
     public interface IDeclares : INode
     {
+        Token ReturnName();
     }
 
     public class DeclFn : IDeclares
@@ -31,6 +34,26 @@ namespace CompilingMethods.Classes.ParserScripts
             //p.Print("return type", retType);
             p.Print("body", body);
         }
+
+        public Token ReturnName()
+        {
+            return name;
+        }
+
+        public void ResolveNames(Scope parentScope)
+        {
+            GlobalVars.StackSlotIndex = 0;
+            var scope = new Scope(parentScope);
+            parameters.ForEach(param => param.ResolveNames(scope));
+            body.ForEach(bod => bod.ResolveNames(scope));
+        }
+
+        public TypePrim CheckTypes()
+        {
+            parameters.ForEach(param => param.CheckTypes());
+            body.ForEach(bod => bod.CheckTypes());
+            return type;
+        }
     }
     
     public class DeclVar : IDeclares
@@ -38,6 +61,7 @@ namespace CompilingMethods.Classes.ParserScripts
         private readonly Token ident;
         private readonly TypePrim type;
         private readonly IExpression value;
+        private int stackSlot;
         
 
         public DeclVar(TypePrim type, Token ident)
@@ -59,6 +83,23 @@ namespace CompilingMethods.Classes.ParserScripts
             p.Print("type", type);
             p.Print("name", ident);
             p.Print("value", value);
+        }
+
+        public Token ReturnName()
+        {
+            return ident;
+        }
+
+        public void ResolveNames(Scope scope)
+        {
+            stackSlot = GlobalVars.StackSlotIndex++;
+            scope.Add(ident.Value, this);
+            value.ResolveNames(scope);
+        }
+
+        public TypePrim CheckTypes()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
