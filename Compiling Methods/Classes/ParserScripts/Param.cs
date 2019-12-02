@@ -3,7 +3,7 @@ using CompilingMethods.Classes.Lexer;
 
 namespace CompilingMethods.Classes.ParserScripts
 {
-    public class Param : INode
+    public class Param : Node
     {
         private readonly Token name;
         private readonly TypePrim type;
@@ -15,21 +15,23 @@ namespace CompilingMethods.Classes.ParserScripts
             this.type = type;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("type", type);
             p.Print("name", name);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
             stackSlot = GlobalVars.StackSlotIndex++;
             scope.Add(name, this);
         }
 
-        public TypePrim CheckTypes()
+        public TypePrim Type => type;
+
+        public override TypePrim CheckTypes()
         {
-            return null;
+            throw new System.NotImplementedException();
         }
     }
 }
