@@ -5,8 +5,11 @@ using CompilingMethods.Enums;
 
 namespace CompilingMethods.Classes.ParserScripts
 {
-    public interface IType : INode
+    public abstract class IType : Node
     {
+        public abstract bool IsArithmetic();
+        public abstract bool IsComparable();
+        public abstract bool HasValue();
     }
 
     public class TypePrim : IType 
@@ -32,36 +35,42 @@ namespace CompilingMethods.Classes.ParserScripts
             };
         }
 
+        public TypePrim(Token token, PrimType type)
+        {
+            this.token = token;
+            kind = type;
+        }
+
         public Token Token => token;
 
         public PrimType Kind => kind;
 
-        public bool IsArithmetic()
+        public override bool IsArithmetic()
         {
             return kind == PrimType.Int || kind == PrimType.Float;
         }
 
-        public bool IsComparable()
+        public override bool IsComparable()
         {
             return IsArithmetic();
         }
 
-        public bool HasValue()
+        public override bool HasValue()
         {
             return kind != PrimType.Void;
         }
         
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("kind", kind);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
             throw new System.NotImplementedException();
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
             throw new System.NotImplementedException();
         }

@@ -1,19 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Xml.Xsl;
 using CompilingMethods.Classes.Compiler;
 using CompilingMethods.Classes.Lexer;
 using CompilingMethods.Enums;
 
 namespace CompilingMethods.Classes.ParserScripts
 {
-    public interface IExpression : INode
+    public abstract class IExpression : Node
     {
-        Token GetToken();
-        TokenType GetTokenType();
+        public abstract Token GetToken();
+        public abstract TokenType GetTokenType();
     }
 
-    public class ExprVar : IExpression
+    public class ExprVar : IExpression, ITargetNode
     {
         public ExprVar(Token lit)
         {
@@ -21,31 +23,39 @@ namespace CompilingMethods.Classes.ParserScripts
         }
 
         private Token Lit { get; }
+        public Node TargetNode { get; set; }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("Var", Lit);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
-            var targetNode = scope.ResolveName(Lit);
+            TargetNode = scope.ResolveName(Lit);
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
-            return new TypePrim(Lit);
+            TypePrim type = null;
+            if (TargetNode?.GetType() == typeof(Param))
+                type = (TargetNode as Param).Type;
+            else if (TargetNode?.GetType() == typeof(StmtVar))
+                type = (TargetNode as StmtVar).Type;
+            return type;
         }
 
-        public TokenType GetTokenType()
+        public override TokenType GetTokenType()
         {
             return Lit.State;
         }
 
-        public Token GetToken()
+        public override Token GetToken()
         {
             return Lit;
         }
+
+
     }
 
     public class ExprConst : IExpression
@@ -57,38 +67,40 @@ namespace CompilingMethods.Classes.ParserScripts
             this.constant = constant;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("const", constant.Value.ToString());
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
             //do nothing
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
             switch (constant.State)
             {
                 case TokenType.LitInt:
-                    return new TypePrim(constant);
+                    return new TypePrim(constant, PrimType.Int);
                 case TokenType.LitFloat:
-                    return new TypePrim(constant);
+                    return new TypePrim(constant, PrimType.Float);
                 case TokenType.LitStr:
-                    return new TypePrim(constant);
+                    return new TypePrim(constant, PrimType.String);
+                case var state when state == TokenType.False || state == TokenType.True:
+                    return new TypePrim(constant, PrimType.Bool);
                 default:
-                    throw new NotImplementedException();
+                    throw new NotImplementedException($"check types {constant.State}");
             }
             //throw new Exception();
         }
 
-        public Token GetToken()
+        public override Token GetToken()
         {
             return constant;
         }
 
-        public TokenType GetTokenType()
+        public override TokenType GetTokenType()
         {
             return constant.State;
         }
@@ -96,9 +108,9 @@ namespace CompilingMethods.Classes.ParserScripts
 
     public class ExprBin : IExpression
     {
-        private readonly IExpression left;
+        protected readonly IExpression left;
         private readonly ExprBinKind op;
-        private readonly IExpression right;
+        protected readonly IExpression right;
 
         public ExprBin(ExprBinKind op, IExpression left, IExpression right)
         {
@@ -107,76 +119,30 @@ namespace CompilingMethods.Classes.ParserScripts
             this.right = right;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("op", op);
             p.Print("left", left);
             p.Print("right", right);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
             left.ResolveNames(scope);
             right.ResolveNames(scope);
         }
 
-        public Token GetToken()
+        public override Token GetToken()
         {
             return left.GetToken();
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
-            if (OperatorType.ReturnOperatorKind(op) == OpTypes.Arithmetic)
-            {
-                var leftType = left.CheckTypes();
-                var rightType = right.CheckTypes();
-
-                if (leftType.IsArithmetic())
-                    TypeHelper.UnifyTypes(leftType, rightType, left.GetToken());
-                else
-                    TypeHelper.SemanticError(left.GetToken(), $"cannot perform arithmetic with this type: {leftType}");
-                return leftType;
-            }
-
-            if (OperatorType.ReturnOperatorKind(op) == OpTypes.Comparison)
-            {
-                var leftType = left.CheckTypes();
-                var rightType = right.CheckTypes();
-
-                if (leftType.IsComparable())
-                    TypeHelper.UnifyTypes(leftType, rightType, left.GetToken());
-                else
-                    TypeHelper.SemanticError(left.GetToken(), $"cannot compare of this type: {leftType}");
-                return new TypePrim(new Token(TokenType.Boolean, false, left.GetToken().LineN));
-            }
-
-            if (OperatorType.ReturnOperatorKind(op) == OpTypes.Equality)
-            {
-                var leftType = left.CheckTypes();
-                var rightType = right.CheckTypes();
-
-                if (leftType.HasValue())
-                    TypeHelper.UnifyTypes(leftType, rightType, left.GetToken());
-                else
-                    TypeHelper.SemanticError(left.GetToken(), $"cannot compare void values");
-                return new TypePrim(new Token(TokenType.Boolean, false, 0));
-            }
-
-            if (OperatorType.ReturnOperatorKind(op) == OpTypes.Logic)
-            {
-                var boolType = new TypePrim(new Token(TokenType.Boolean, false, 0));
-                var leftType = left.CheckTypes();
-                var rightType = right.CheckTypes();
-                TypeHelper.UnifyTypes(leftType, boolType, left.GetToken());
-                TypeHelper.UnifyTypes(rightType, boolType, left.GetToken());
-                return boolType;
-            }
-
-            throw new SystemException();
+            throw new InvalidOperationException("This should not be created");
         }
 
-        public TokenType GetTokenType()
+        public override TokenType GetTokenType()
         {
             return left.GetTokenType();
         }
@@ -187,12 +153,39 @@ namespace CompilingMethods.Classes.ParserScripts
         public ExprBinaryArithmetic(ExprBinKind op, IExpression left, IExpression right) : base(op, left, right)
         {
         }
+
+        public override TypePrim CheckTypes()
+        {
+            var leftType = left.CheckTypes();
+            var rightType = right.CheckTypes();
+
+            if (!leftType.IsArithmetic() || !rightType.IsArithmetic())
+            {
+                
+                TypeHelper.SemanticError(left.GetToken().LineN > right.GetToken().LineN ? left.GetToken() : right.GetToken(),
+                    $"{leftType.Kind} or {rightType.Kind} is not arithmetic");
+            }
+                
+            TypeHelper.UnifyTypes(leftType, rightType);
+            return leftType;
+        }
     }
     
     class ExprBinaryComparison : ExprBin
     {
         public ExprBinaryComparison(ExprBinKind op, IExpression left, IExpression right) : base(op, left, right)
         {
+        }
+        
+        public override TypePrim CheckTypes()
+        {
+            var leftType = left.CheckTypes();
+            var rightType = right.CheckTypes();
+            
+            if(!leftType.IsComparable() || !rightType.IsComparable())
+                TypeHelper.SemanticError(left.GetToken().LineN > right.GetToken().LineN ? left.GetToken() : right.GetToken(), $"{leftType.Kind} is not comparable with {rightType.Kind}");
+            TypeHelper.UnifyTypes(leftType, rightType);
+            return new TypePrim(new Token(TokenType.Boolean, null, left.GetToken().LineN));
         }
     }
     
@@ -201,6 +194,17 @@ namespace CompilingMethods.Classes.ParserScripts
         public ExprBinaryEquality(ExprBinKind op, IExpression left, IExpression right) : base(op, left, right)
         {
         }
+        
+        public override TypePrim CheckTypes()
+        {
+            var leftType = left.CheckTypes();
+            var rightType = right.CheckTypes();
+            
+            if(!leftType.HasValue() || !rightType.HasValue())
+                TypeHelper.SemanticError(left.GetToken().LineN > right.GetToken().LineN ? left.GetToken() : right.GetToken(), $"{leftType.Kind} or {rightType.Kind} do not have value");
+            TypeHelper.UnifyTypes(leftType, rightType);
+            return new TypePrim(new Token(TokenType.Boolean, null, left.GetToken().LineN));
+        }
     }
     
     class ExprBinaryLogic : ExprBin
@@ -208,10 +212,21 @@ namespace CompilingMethods.Classes.ParserScripts
         public ExprBinaryLogic(ExprBinKind op, IExpression left, IExpression right) : base(op, left, right)
         {
         }
+
+        public override TypePrim CheckTypes()
+        {
+            var leftType = left.CheckTypes();
+            var rightType = right.CheckTypes();
+            
+            TypeHelper.UnifyTypes(leftType, new TypePrim(new Token(TokenType.Boolean, null, left.GetToken().LineN)));
+            TypeHelper.UnifyTypes(rightType, new TypePrim(new Token(TokenType.Boolean, null, left.GetToken().LineN)));
+
+            return new TypePrim(new Token(TokenType.Boolean, null, left.GetToken().LineN));
+        }
     }
     
 
-    public class ExprFnCall : IExpression
+    public class ExprFnCall : IExpression, ITargetNode
     {
         private readonly List<IExpression> args;
         private readonly Token ident;
@@ -222,34 +237,61 @@ namespace CompilingMethods.Classes.ParserScripts
             this.args = args;
         }
 
-        public void PrintNode(AstPrinter p)
+        public Node TargetNode { get; set; }
+
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("ident", ident);
             p.Print("args", args);
         }
 
-        public Token GetToken()
+        public override Token GetToken()
         {
             return ident;
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
-            var targetNode = scope.ResolveName(ident);
+            TargetNode = scope.ResolveName(ident);
             foreach (var arg in args)
             {
                 arg.ResolveNames(scope);
             }
         }
 
-        public TokenType GetTokenType()
+        public override TokenType GetTokenType()
         {
             return ident.State;
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
-            throw new NotImplementedException();
+            var argTypes = args.Select(x => x.CheckTypes()).ToList();
+
+            if (TargetNode == null)
+                return null;
+            else if (TargetNode.GetType() != typeof(DeclFn))
+            {
+                TypeHelper.SemanticError(ident, "Not a function");
+                return null;
+            }
+
+            var paramTypes = (TargetNode as DeclFn).Parameters.Select(x => x.Type).ToList();
+            if (argTypes.Count != paramTypes.Count)
+            {
+                TypeHelper.SemanticError(ident, "Invalid function argument count");
+            }
+
+            var count = argTypes.Count < paramTypes.Count ? argTypes.Count : paramTypes.Count;
+
+            for (var i = 0; i < count; i++)
+            {
+                var paramType = paramTypes[i];
+                var argType = argTypes[i];
+                TypeHelper.UnifyTypes(paramType, argType);
+            }
+
+            return (TargetNode as DeclFn).Type;
         }
     }
 }

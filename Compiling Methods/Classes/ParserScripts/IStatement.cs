@@ -8,7 +8,7 @@ using CompilingMethods.Enums;
 namespace CompilingMethods.Classes.ParserScripts
 {
     //NODE STATEMENTBLOCK
-    public interface IStatement : INode
+    public abstract class IStatement : Node
     {
     }
 
@@ -23,23 +23,23 @@ namespace CompilingMethods.Classes.ParserScripts
             this.elseBody = elseBody;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("branch", branches);
             p.Print("else body", elseBody);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
             branches.ForEach(branch => branch.ResolveNames(scope));
+            elseBody?.ResolveNames(scope);
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
             branches.ForEach(branch => branch.CheckTypes());
-            if (elseBody != null) 
-                return elseBody.CheckTypes();
-            return null;
+            elseBody?.CheckTypes();
+            return new TypePrim(null, PrimType.Void);
         }
     }
 
@@ -52,21 +52,21 @@ namespace CompilingMethods.Classes.ParserScripts
             this.statements = statements;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("statement", statements);
         }
 
-        public void ResolveNames(Scope parentScope)
+        public override void ResolveNames(Scope parentScope)
         {
             var scope = new Scope(parentScope);
             statements.ForEach(statement => statement.ResolveNames(scope));
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
             statements.ForEach(statement => statement.CheckTypes());
-            return null;
+            return new TypePrim(new Token(TokenType.Void, null, 0));
         }
     }
 
@@ -82,23 +82,24 @@ namespace CompilingMethods.Classes.ParserScripts
         public IExpression Condition { get; }
         public StmtBlock Body { get; }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("Cond", Condition);
             p.Print("Body", Body);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
             Condition.ResolveNames(scope);
             Body.ResolveNames(scope);
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
             var condType = Condition.CheckTypes();
-            //TypeHelper.UnifyTypes(new TypePrim(new Token(Condition.GetTokenType(), 0, 0)), new TypePrim(new Token(TokenType.Boolean, false, 0)));
-            return null;
+            TypeHelper.UnifyTypes(new TypePrim(null, PrimType.Bool), condType);
+            Body.CheckTypes();
+            return new TypePrim(null, PrimType.Void);
         }
     }
 
@@ -113,47 +114,50 @@ namespace CompilingMethods.Classes.ParserScripts
             this.expr = expr;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("keyword", kw);
             p.Print("expr", expr);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
-            expr.ResolveNames(scope);
+            expr?.ResolveNames(scope);
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
-            throw new NotImplementedException();
+            var returnType = (FindAncestor(typeof(DeclFn)) as DeclFn)?.Type;
+            var valueType = expr.CheckTypes();
+            TypeHelper.UnifyTypes(returnType, valueType);
+            return new TypePrim(null, PrimType.Void);
         }
     }
 
     public class StmtBreak : IStatement
     {
         private readonly Token kw;
-        private INode parent;
+        private Node parent;
 
         public StmtBreak(Token kw)
         {
             this.kw = kw;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("keyword", kw);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
             throw new System.NotImplementedException();
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
             //donothing
-            return null;
+            return new TypePrim(null, PrimType.Void);
         }
     }
     
@@ -166,20 +170,20 @@ namespace CompilingMethods.Classes.ParserScripts
             this.kw = kw;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("keyword", kw);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
             throw new System.NotImplementedException();
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
             //do nothing
-            return null;
+            return new TypePrim(null, PrimType.Void);
         }
     }
     
@@ -196,23 +200,24 @@ namespace CompilingMethods.Classes.ParserScripts
             this.body = body;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("cond", condition);
             p.Print("body", body);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
             condition.ResolveNames(scope);
             body.ResolveNames(scope);
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
             var condType = condition.CheckTypes();
-            TypeHelper.UnifyTypes(condType, new TypePrim(new Token(TokenType.Boolean, false, 0)));
-            return body.CheckTypes();
+            TypeHelper.UnifyTypes(new TypePrim(null, PrimType.Bool), condType);
+            body.CheckTypes();
+            return new TypePrim(null, PrimType.Void);
         }
     }
 
@@ -222,7 +227,8 @@ namespace CompilingMethods.Classes.ParserScripts
         private readonly TypePrim type;
         private readonly IExpression value;
         private int stackSlot;
-        
+
+        public TypePrim Type => type;
 
         public StmtVar(TypePrim type, Token ident)
         {
@@ -238,26 +244,25 @@ namespace CompilingMethods.Classes.ParserScripts
             this.value = value;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("type", type);
             p.Print("name", ident);
             p.Print("value", value);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
             stackSlot = GlobalVars.StackSlotIndex++;
             scope.Add(ident, this);
+            value?.ResolveNames(scope);
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
-            if (value == null) return null;
-            var valueType = value.CheckTypes();
-            TypeHelper.UnifyTypes(type, valueType, ident);
-            
-            return null;
+            var exprType = value.CheckTypes();
+            TypeHelper.UnifyTypes(exprType, type);
+            return new TypePrim(null, PrimType.Void);
         }
     }
 
@@ -266,8 +271,9 @@ namespace CompilingMethods.Classes.ParserScripts
         private readonly Token ident;
         private readonly TokenType op;
         private readonly IExpression value;
+        public Node TargetNode { get; set; }
 
-
+        
         public StmtVarAssign(Token ident, TokenType op, IExpression value)
         {
             this.ident = ident;
@@ -275,44 +281,46 @@ namespace CompilingMethods.Classes.ParserScripts
             this.value = value;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("name", ident);
             p.Print("value", value);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
-            var targetNode = scope.ResolveName(ident);
+            TargetNode = scope.ResolveName(ident);
             value.ResolveNames(scope);
         }
         
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
-            return null;
+            throw new System.NotImplementedException();
         }
     }
 
     public class StmtFnCall : IStatement //TO-EXPRESSION
     {
         private readonly IExpression fnCall;
+        public Node TargetNode { get; set; }
 
         public StmtFnCall(ExprFnCall fnCall)
         {
             this.fnCall = fnCall;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("call", fnCall);
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
+            TargetNode = scope.ResolveName(fnCall.GetToken());
             fnCall.ResolveNames(scope);
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
             return fnCall.CheckTypes();
         }

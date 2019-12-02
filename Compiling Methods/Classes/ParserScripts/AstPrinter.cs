@@ -14,10 +14,10 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             if (obj == null)
                 PrintText(title, "null");
-            else if (obj is INode node)
+            else if (obj is Node node)
                 PrintNode(title, node);
-            else if (obj.GetType() == typeof(List<INode>))
-                PrintArray(title, (List<INode>) obj);
+            else if (obj.GetType() == typeof(List<Node>))
+                PrintArray(title, (List<Node>) obj);
             else if (obj.GetType() == typeof(List<IStatement>))
                 PrintArray(title, (List<IStatement>) obj);
             else if (obj.GetType() == typeof(List<Param>))
@@ -53,7 +53,7 @@ namespace CompilingMethods.Classes.ParserScripts
             }
         }
 
-        private void PrintNode(string title, INode node)
+        private void PrintNode(string title, Node node)
         {
             PrintText(title, $"{node.GetType().Name}");
             indentLevel++;

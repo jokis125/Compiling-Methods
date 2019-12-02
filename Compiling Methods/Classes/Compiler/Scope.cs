@@ -9,7 +9,7 @@ namespace CompilingMethods.Classes.Compiler
     public class Scope
     {
         private Scope parentScope;
-        private Dictionary<String, INode> members = new Dictionary<String, INode>();
+        private Dictionary<String, Node> members = new Dictionary<String, Node>();
 
         public Scope(Scope parentScope, string fileName)
         {
@@ -21,7 +21,7 @@ namespace CompilingMethods.Classes.Compiler
             this.parentScope = parentScope;
         }
 
-        public void Add(Token nameToken, INode node)
+        public void Add(Token nameToken, Node node)
         {
             var name = nameToken.Value;
             if (members.ContainsKey(name))
@@ -31,7 +31,7 @@ namespace CompilingMethods.Classes.Compiler
             members.Add(name, node);
         }
 
-        public INode ResolveName(Token nameToken)
+        public Node ResolveName(Token nameToken)
         {
             var name = nameToken.Value;
             if (members.ContainsKey(name))

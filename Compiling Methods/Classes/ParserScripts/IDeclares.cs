@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using CompilingMethods.Classes.Compiler;
 using CompilingMethods.Classes.Lexer;
+using CompilingMethods.Enums;
 using Microsoft.VisualBasic.CompilerServices;
 
 namespace CompilingMethods.Classes.ParserScripts
 {
-    public interface IDeclares : INode
+    public abstract class IDeclares : Node
     {
-        Token ReturnName();
+       public abstract Token ReturnName();
     }
 
     public class DeclFn : IDeclares
@@ -26,7 +27,11 @@ namespace CompilingMethods.Classes.ParserScripts
             this.body = body;
         }
 
-        public void PrintNode(AstPrinter p)
+        public List<Param> Parameters => parameters;
+
+        public TypePrim Type => type;
+
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("type", type);
             p.Print("name", name);
@@ -35,12 +40,12 @@ namespace CompilingMethods.Classes.ParserScripts
             p.Print("body", body);
         }
 
-        public Token ReturnName()
+        public override Token ReturnName()
         {
             return name;
         }
 
-        public void ResolveNames(Scope parentScope)
+        public override void ResolveNames(Scope parentScope)
         {
             GlobalVars.StackSlotIndex = 0;
             var scope = new Scope(parentScope);
@@ -48,11 +53,13 @@ namespace CompilingMethods.Classes.ParserScripts
             body.ForEach(bod => bod.ResolveNames(scope));
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
-            parameters.ForEach(param => param.CheckTypes());
+            //parameters.ForEach(param => param.CheckTypes());
             body.ForEach(bod => bod.CheckTypes());
-            return type;
+            return new TypePrim(null, PrimType.Void);
+            //throw new System.NotImplementedException();
+            
         }
     }
     
@@ -78,26 +85,26 @@ namespace CompilingMethods.Classes.ParserScripts
             this.value = value;
         }
 
-        public void PrintNode(AstPrinter p)
+        public override void PrintNode(AstPrinter p)
         {
             p.Print("type", type);
             p.Print("name", ident);
             p.Print("value", value);
         }
 
-        public Token ReturnName()
+        public override Token ReturnName()
         {
             return ident;
         }
 
-        public void ResolveNames(Scope scope)
+        public override void ResolveNames(Scope scope)
         {
             stackSlot = GlobalVars.StackSlotIndex++;
             scope.Add(ident.Value, this);
             value.ResolveNames(scope);
         }
 
-        public TypePrim CheckTypes()
+        public override TypePrim CheckTypes()
         {
             throw new System.NotImplementedException();
         }
