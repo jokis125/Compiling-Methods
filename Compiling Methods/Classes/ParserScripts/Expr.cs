@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using CompilingMethods.Classes.Compiler;
 using CompilingMethods.Classes.Lexer;
 using CompilingMethods.Enums;
@@ -180,6 +181,35 @@ namespace CompilingMethods.Classes.ParserScripts
             return left.GetTokenType();
         }
     }
+
+    class ExprBinaryArithmetic : ExprBin
+    {
+        public ExprBinaryArithmetic(ExprBinKind op, IExpression left, IExpression right) : base(op, left, right)
+        {
+        }
+    }
+    
+    class ExprBinaryComparison : ExprBin
+    {
+        public ExprBinaryComparison(ExprBinKind op, IExpression left, IExpression right) : base(op, left, right)
+        {
+        }
+    }
+    
+    class ExprBinaryEquality : ExprBin
+    {
+        public ExprBinaryEquality(ExprBinKind op, IExpression left, IExpression right) : base(op, left, right)
+        {
+        }
+    }
+    
+    class ExprBinaryLogic : ExprBin
+    {
+        public ExprBinaryLogic(ExprBinKind op, IExpression left, IExpression right) : base(op, left, right)
+        {
+        }
+    }
+    
 
     public class ExprFnCall : IExpression
     {
