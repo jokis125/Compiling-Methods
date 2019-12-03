@@ -114,6 +114,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public ExprBin(ExprBinKind op, IExpression left, IExpression right)
         {
+            AddChildren(left, right);
             this.left = left;
             this.op = op;
             this.right = right;
@@ -233,6 +234,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public ExprFnCall(Token ident, List<IExpression> args)
         {
+            AddChildren(args.ToArray());
             this.ident = ident;
             this.args = args;
         }

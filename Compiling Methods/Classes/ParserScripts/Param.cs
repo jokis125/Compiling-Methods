@@ -11,6 +11,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public Param(Token name, TypePrim type)
         {
+            AddChildren(type);
             this.name = name;
             this.type = type;
         }

@@ -19,6 +19,10 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public StmtIf(List<Branch> branches, StmtBlock elseBody)
         {
+            var temp = new Node[branches.Count + 1];
+            temp[branches.Count] = elseBody;
+            
+            AddChildren(temp);
             this.branches = branches;
             this.elseBody = elseBody;
         }
@@ -49,6 +53,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public StmtBlock(List<IStatement> statements)
         {
+            AddChildren(statements.ToArray());
             this.statements = statements;
         }
 
@@ -70,7 +75,7 @@ namespace CompilingMethods.Classes.ParserScripts
         }
     }
 
-    public class Branch : IStatement
+    public class Branch : Node
     {
 
         public Branch(IExpression condition, StmtBlock body)
@@ -110,6 +115,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public StmtReturn(Token kw, IExpression expr = null)
         {
+            AddChildren(expr);
             this.kw = kw;
             this.expr = expr;
         }
@@ -137,7 +143,7 @@ namespace CompilingMethods.Classes.ParserScripts
     public class StmtBreak : IStatement
     {
         private readonly Token kw;
-        private Node parent;
+        private Node TargetNode { get; set; }
 
         public StmtBreak(Token kw)
         {
@@ -151,7 +157,22 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void ResolveNames(Scope scope)
         {
-            throw new System.NotImplementedException();
+            var currNode = parent;
+            while (currNode != null)
+            {
+                if (currNode.GetType() == typeof(StmtWhile))
+                {
+                    TargetNode = currNode;
+                    break;
+                }
+                currNode = currNode.parent;
+
+            }
+
+            if (TargetNode == null)
+            {
+                Console.WriteLine($"{GlobalVars.FileName}:{kw.LineN}: error: Break not inside a loop");
+            }
         }
 
         public override TypePrim CheckTypes()
@@ -164,6 +185,7 @@ namespace CompilingMethods.Classes.ParserScripts
     public class StmtContinue : IStatement
     {
         private readonly Token kw;
+        private Node TargetNode { get; set; }
 
         public StmtContinue(Token kw)
         {
@@ -177,7 +199,22 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void ResolveNames(Scope scope)
         {
-            throw new System.NotImplementedException();
+            var currNode = parent;
+            while (currNode != null)
+            {
+                if (currNode.GetType() == typeof(StmtWhile))
+                {
+                    TargetNode = currNode;
+                    break;
+                }
+                currNode = currNode.parent;
+
+            }
+
+            if (TargetNode == null)
+            {
+                Console.WriteLine($"{GlobalVars.FileName}:{kw.LineN}: error: Continue not inside a loop");
+            }
         }
 
         public override TypePrim CheckTypes()
@@ -196,6 +233,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public StmtWhile(IExpression condition, StmtBlock body)
         {
+            AddChildren(condition, body);
             this.condition = condition;
             this.body = body;
         }
@@ -232,6 +270,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public StmtVar(TypePrim type, Token ident)
         {
+            AddChildren(type);
             this.type = type;
             this.ident = ident;
             value = null;
@@ -239,6 +278,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public StmtVar(TypePrim type, Token ident, IExpression value)
         {
+            AddChildren(type, value);
             this.type = type;
             this.ident = ident;
             this.value = value;
@@ -276,6 +316,7 @@ namespace CompilingMethods.Classes.ParserScripts
         
         public StmtVarAssign(Token ident, TokenType op, IExpression value)
         {
+            AddChildren(value);
             this.ident = ident;
             this.op = op;
             this.value = value;
@@ -306,6 +347,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public StmtFnCall(ExprFnCall fnCall)
         {
+            AddChildren(fnCall);
             this.fnCall = fnCall;
         }
 

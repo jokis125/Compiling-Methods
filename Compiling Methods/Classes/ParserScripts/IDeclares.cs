@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using CompilingMethods.Classes.Compiler;
 using CompilingMethods.Classes.Lexer;
@@ -21,6 +22,11 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public DeclFn(TypePrim type, Token name, List<Param> parameters, List<IStatement> body)
         {
+            var bodyAndParams = new Node[body.Count + parameters.Count + 1];
+            Array.Copy(parameters.ToArray(), bodyAndParams, parameters.Count);
+            Array.Copy(body.ToArray(), bodyAndParams, body.Count);
+            bodyAndParams[body.Count + parameters.Count] = type;
+            AddChildren(bodyAndParams);
             this.type = type;
             this.name = name;
             this.parameters = parameters;

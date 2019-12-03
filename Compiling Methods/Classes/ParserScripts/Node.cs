@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using CompilingMethods.Classes.Compiler;
 using CompilingMethods.Classes.Lexer;
 using CompilingMethods.Enums;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace CompilingMethods.Classes.ParserScripts
 {
@@ -43,6 +42,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public Root(List<IDeclares> decls)
         {
+            AddChildren(decls.ToArray());
             this.decls = decls;
         }
 
