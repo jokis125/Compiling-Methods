@@ -33,10 +33,16 @@ namespace CompilingMethods.Classes.Compiler
                 //throw;
                 return;
             }
+
+            if (root.Decls.Count == 0)
+            {
+                Console.Write($"{lexer.GetScriptName()} is empty");
+                return;
+            }
             var printer = new AstPrinter();
             printer.Print("root", root);
 
-            Scope rootScope = new Scope(null, lexer.GetScriptName());
+            var rootScope = new Scope(null, lexer.GetScriptName());
             try
             {
                 root.ResolveNames(rootScope);

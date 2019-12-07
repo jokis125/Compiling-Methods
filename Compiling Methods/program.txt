@@ -1,11 +1,6 @@
-void asas(string a, int c)
+int a()
 {
-    string b;
-    if (b < 5)
-    {
-    }
+    int asaaa = "asd";
+    return "as";
 }
 
-void square()
-{
-}

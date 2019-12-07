@@ -57,6 +57,8 @@ namespace CompilingMethods.Classes.ParserScripts
             decls.ForEach(decl => decl.ResolveNames(scope));
         }
 
+        public List<IDeclares> Decls => decls;
+
         public override TypePrim CheckTypes()
         {
             decls.ForEach(decl => decl.CheckTypes());
