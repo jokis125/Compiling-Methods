@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using CompilingMethods.Classes.ParserScripts;
 
 namespace CompilingMethods.Classes.Compiler
@@ -7,6 +8,7 @@ namespace CompilingMethods.Classes.Compiler
     {
         private readonly Lexer.Lexer lexer = new Lexer.Lexer();
         private Parser parser;
+        private bool mainFound = false;
         public void Compile()
         {
             lexer.GetText();
@@ -34,9 +36,14 @@ namespace CompilingMethods.Classes.Compiler
                 return;
             }
 
-            if (root.Decls.Count == 0)
+            foreach (var decl in root.Decls.Where(decl => decl.ReturnName().Value.ToString().ToLower() == "main"))
             {
-                Console.Write($"{lexer.GetScriptName()} is empty");
+                mainFound = true;
+            }
+
+            if (!mainFound)
+            {
+                Console.WriteLine($"function main was not found in {lexer.GetScriptName()}");
                 return;
             }
             var printer = new AstPrinter();
@@ -52,7 +59,7 @@ namespace CompilingMethods.Classes.Compiler
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                //throw;
+                throw;
             }
             
             

@@ -297,9 +297,9 @@ namespace CompilingMethods.Classes.ParserScripts
                     return Expect(TokenType.Char);
                 case TokenType.Void:
                     return Expect(TokenType.Void);
+                default:
+                    throw new BadTokenException($"{scriptName}:{currentToken.LineN} error: Unknown type {currentToken.Value}");
             }
-
-            return null;
         }
 
         private List<IStatement> ParseStmtBlock()

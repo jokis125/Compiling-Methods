@@ -22,7 +22,8 @@ namespace CompilingMethods.Classes.ParserScripts
             var temp = new Node[branches.Count + 1];
             temp[branches.Count] = elseBody;
             
-            AddChildren(temp);
+            AddChildren(branches.ToArray());
+            AddChildren(elseBody);
             this.branches = branches;
             this.elseBody = elseBody;
         }
@@ -43,7 +44,7 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             branches.ForEach(branch => branch.CheckTypes());
             elseBody?.CheckTypes();
-            return new TypePrim(null, PrimType.Void);
+            return new TypePrim(null, PrimType.@void);
         }
     }
 
@@ -89,6 +90,9 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void PrintNode(AstPrinter p)
         {
+            
+            AddChildren(Condition);
+            AddChildren(Body);
             p.Print("Cond", Condition);
             p.Print("Body", Body);
         }
@@ -102,9 +106,9 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TypePrim CheckTypes()
         {
             var condType = Condition.CheckTypes();
-            TypeHelper.UnifyTypes(new TypePrim(null, PrimType.Bool), condType);
+            TypeHelper.UnifyTypes(new TypePrim(null, PrimType.@bool), condType);
             Body.CheckTypes();
-            return new TypePrim(null, PrimType.Void);
+            return new TypePrim(null, PrimType.@void);
         }
     }
 
@@ -134,9 +138,9 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TypePrim CheckTypes()
         {
             var returnType = (FindAncestor(typeof(DeclFn)) as DeclFn)?.Type;
-            var valueType = expr.CheckTypes();
+            var valueType = expr?.CheckTypes();
             TypeHelper.UnifyTypes(returnType, valueType);
-            return new TypePrim(null, PrimType.Void);
+            return new TypePrim(null, PrimType.@void);
         }
     }
 
@@ -178,7 +182,7 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TypePrim CheckTypes()
         {
             //donothing
-            return new TypePrim(null, PrimType.Void);
+            return new TypePrim(null, PrimType.@void);
         }
     }
     
@@ -220,7 +224,7 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TypePrim CheckTypes()
         {
             //do nothing
-            return new TypePrim(null, PrimType.Void);
+            return new TypePrim(null, PrimType.@void);
         }
     }
     
@@ -253,9 +257,9 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TypePrim CheckTypes()
         {
             var condType = condition.CheckTypes();
-            TypeHelper.UnifyTypes(new TypePrim(null, PrimType.Bool), condType);
+            TypeHelper.UnifyTypes(new TypePrim(null, PrimType.@bool), condType);
             body.CheckTypes();
-            return new TypePrim(null, PrimType.Void);
+            return new TypePrim(null, PrimType.@void);
         }
     }
 
@@ -301,8 +305,8 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TypePrim CheckTypes()
         {
             var exprType = value.CheckTypes();
-            TypeHelper.UnifyTypes(exprType, type);
-            return new TypePrim(null, PrimType.Void);
+            TypeHelper.UnifyTypes(type, exprType);
+            return new TypePrim(null, PrimType.@void);
         }
     }
 
@@ -358,7 +362,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void ResolveNames(Scope scope)
         {
-            TargetNode = scope.ResolveName(fnCall.GetToken());
+            //TargetNode = scope.ResolveName(fnCall.GetToken());
             fnCall.ResolveNames(scope);
         }
 

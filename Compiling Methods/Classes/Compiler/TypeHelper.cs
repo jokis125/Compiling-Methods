@@ -32,7 +32,7 @@ namespace CompilingMethods.Classes.Compiler
                 var prim1 = type1 as TypePrim;
                 
                 if(prim0.Kind != prim1.Kind)
-                    SemanticError(type0.Token.LineN > type1.Token.LineN ? type0.Token : type1.Token,
+                    SemanticError(type0.Token == null ? type1.Token : type0.Token,
                         $"type mismatch: expected {type0.Kind}, got {type1.Kind}");
                 return;
 

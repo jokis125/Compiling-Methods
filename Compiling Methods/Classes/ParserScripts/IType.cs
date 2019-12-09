@@ -22,15 +22,15 @@ namespace CompilingMethods.Classes.ParserScripts
             this.token = token;
             this.kind = token.State switch
             {
-                TokenType.Int => PrimType.Int,
-                TokenType.LitInt => PrimType.Int,
-                TokenType.Char => PrimType.Char,
-                TokenType.Float => PrimType.Float,
-                TokenType.LitFloat => PrimType.Float,
-                TokenType.String => PrimType.String,
-                TokenType.LitStr => PrimType.String,
-                TokenType.Boolean => PrimType.Bool,
-                TokenType.Void => PrimType.Void,
+                TokenType.Int => PrimType.@int,
+                TokenType.LitInt => PrimType.@int,
+                TokenType.Char => PrimType.@char,
+                TokenType.Float => PrimType.@float,
+                TokenType.LitFloat => PrimType.@float,
+                TokenType.String => PrimType.@string,
+                TokenType.LitStr => PrimType.@string,
+                TokenType.Boolean => PrimType.@bool,
+                TokenType.Void => PrimType.@void,
                 _ => this.kind
             };
         }
@@ -47,7 +47,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override bool IsArithmetic()
         {
-            return kind == PrimType.Int || kind == PrimType.Float;
+            return kind == PrimType.@int || kind == PrimType.@float;
         }
 
         public override bool IsComparable()
@@ -57,7 +57,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override bool HasValue()
         {
-            return kind != PrimType.Void;
+            return kind != PrimType.@void;
         }
         
         public override void PrintNode(AstPrinter p)

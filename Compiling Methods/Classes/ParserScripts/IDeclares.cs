@@ -63,7 +63,7 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             //parameters.ForEach(param => param.CheckTypes());
             body.ForEach(bod => bod.CheckTypes());
-            return new TypePrim(null, PrimType.Void);
+            return new TypePrim(null, PrimType.@void);
             //throw new System.NotImplementedException();
             
         }

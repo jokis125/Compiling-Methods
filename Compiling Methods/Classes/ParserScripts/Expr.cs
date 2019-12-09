@@ -82,13 +82,13 @@ namespace CompilingMethods.Classes.ParserScripts
             switch (constant.State)
             {
                 case TokenType.LitInt:
-                    return new TypePrim(constant, PrimType.Int);
+                    return new TypePrim(constant, PrimType.@int);
                 case TokenType.LitFloat:
-                    return new TypePrim(constant, PrimType.Float);
+                    return new TypePrim(constant, PrimType.@float);
                 case TokenType.LitStr:
-                    return new TypePrim(constant, PrimType.String);
+                    return new TypePrim(constant, PrimType.@string);
                 case var state when state == TokenType.False || state == TokenType.True:
-                    return new TypePrim(constant, PrimType.Bool);
+                    return new TypePrim(constant, PrimType.@bool);
                 default:
                     throw new NotImplementedException($"check types {constant.State}");
             }
@@ -160,11 +160,17 @@ namespace CompilingMethods.Classes.ParserScripts
             var leftType = left.CheckTypes();
             var rightType = right.CheckTypes();
 
-            if (!leftType.IsArithmetic() || !rightType.IsArithmetic())
+            if (!leftType.IsArithmetic())
             {
                 
-                TypeHelper.SemanticError(left.GetToken().LineN > right.GetToken().LineN ? left.GetToken() : right.GetToken(),
-                    $"{leftType.Kind} or {rightType.Kind} is not arithmetic");
+                TypeHelper.SemanticError(left.GetToken(), $"{leftType.Kind} is not arithmetic");
+                return rightType;
+            }
+            if (!rightType.IsArithmetic())
+            {
+                
+                TypeHelper.SemanticError(right.GetToken(),$"{rightType.Kind} is not arithmetic");
+                return leftType;
             }
                 
             TypeHelper.UnifyTypes(leftType, rightType);
@@ -282,6 +288,12 @@ namespace CompilingMethods.Classes.ParserScripts
             if (argTypes.Count != paramTypes.Count)
             {
                 TypeHelper.SemanticError(ident, "Invalid function argument count");
+                return null;
+            }
+
+            if (argTypes.Any(x => x == null) || paramTypes.Any(x => x == null))
+            {
+                TypeHelper.SemanticError(ident, $"Argument {ident.Value} is not assignable to parameter");
             }
 
             var count = argTypes.Count < paramTypes.Count ? argTypes.Count : paramTypes.Count;
