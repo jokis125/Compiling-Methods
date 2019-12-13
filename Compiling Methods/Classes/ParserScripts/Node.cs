@@ -12,7 +12,8 @@ namespace CompilingMethods.Classes.ParserScripts
         public abstract void PrintNode(AstPrinter p);
         public abstract void ResolveNames(Scope scope);
         public abstract TypePrim CheckTypes();
-
+        public abstract void GenCode(CodeWriter w);
+        
         public void AddChildren(params Node[] children)
         {
             foreach (var child in children)
@@ -65,7 +66,14 @@ namespace CompilingMethods.Classes.ParserScripts
             return new TypePrim(new Token(TokenType.Void, null, 0));
             //throw new NotImplementedException();
         }
-        
+
+        public override void GenCode(CodeWriter w)
+        {
+            foreach (var declares in decls)
+            {
+                declares.GenCode(w);
+            }
+        }
     }
 
 

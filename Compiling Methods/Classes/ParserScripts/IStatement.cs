@@ -46,6 +46,15 @@ namespace CompilingMethods.Classes.ParserScripts
             elseBody?.CheckTypes();
             return new TypePrim(null, PrimType.@void);
         }
+
+        public override void GenCode(CodeWriter w)
+        {
+            var endL = new Label();
+            branches.ForEach(branch => branch.GenCode(w));
+            elseBody.GenCode(w);
+            w.PlaceLabel(endL);
+            
+        }
     }
 
     public class StmtBlock : IStatement
@@ -73,6 +82,11 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             statements.ForEach(statement => statement.CheckTypes());
             return new TypePrim(new Token(TokenType.Void, null, 0));
+        }
+
+        public override void GenCode(CodeWriter w)
+        {
+            statements.ForEach(s => s.GenCode(w));
         }
     }
 
@@ -110,6 +124,15 @@ namespace CompilingMethods.Classes.ParserScripts
             Body.CheckTypes();
             return new TypePrim(null, PrimType.@void);
         }
+
+        public override void GenCode(CodeWriter w)
+        {
+            var endL = new Label();
+            Condition.GenCode(w);
+            w.Write(Instructions.Bz, endL);
+            Body.GenCode(w);
+            w.PlaceLabel(endL);
+        }
     }
 
     public class StmtReturn : IStatement
@@ -138,9 +161,20 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TypePrim CheckTypes()
         {
             var returnType = (FindAncestor(typeof(DeclFn)) as DeclFn)?.Type;
-            var valueType = expr?.CheckTypes();
+            var valueType = expr != null ? expr.CheckTypes() : new TypePrim(null, PrimType.@void);
             TypeHelper.UnifyTypes(returnType, valueType);
             return new TypePrim(null, PrimType.@void);
+        }
+
+        public override void GenCode(CodeWriter w)
+        {
+            if (expr == null)
+            {
+                w.Write(Instructions.Ret);
+                return;
+            }
+            expr.GenCode(w);
+            w.Write(Instructions.RetV);
         }
     }
 
@@ -178,11 +212,17 @@ namespace CompilingMethods.Classes.ParserScripts
                 Console.WriteLine($"{GlobalVars.FileName}:{kw.LineN}: error: Break not inside a loop");
             }
         }
+        
 
         public override TypePrim CheckTypes()
         {
             //donothing
             return new TypePrim(null, PrimType.@void);
+        }
+
+        public override void GenCode(CodeWriter w)
+        {
+            w.Write(Instructions.Br); //TODO :LOOP_END
         }
     }
     
@@ -226,6 +266,11 @@ namespace CompilingMethods.Classes.ParserScripts
             //do nothing
             return new TypePrim(null, PrimType.@void);
         }
+        
+        public override void GenCode(CodeWriter w)
+        {
+            w.Write(Instructions.Cn); //TODO :LOOP_END
+        }
     }
     
     
@@ -260,6 +305,11 @@ namespace CompilingMethods.Classes.ParserScripts
             TypeHelper.UnifyTypes(new TypePrim(null, PrimType.@bool), condType);
             body.CheckTypes();
             return new TypePrim(null, PrimType.@void);
+        }
+        
+        public override void GenCode(CodeWriter w)
+        {
+            w.Write(Instructions.Br); //TODO :LOOP_END
         }
     }
 
@@ -308,6 +358,13 @@ namespace CompilingMethods.Classes.ParserScripts
             TypeHelper.UnifyTypes(type, exprType);
             return new TypePrim(null, PrimType.@void);
         }
+
+        public override void GenCode(CodeWriter w)
+        {
+            if (value == null) return;
+            value.GenCode(w);
+            w.Write(Instructions.Ret);
+        }
     }
 
     public class StmtVarAssign : IStatement
@@ -316,6 +373,7 @@ namespace CompilingMethods.Classes.ParserScripts
         private readonly TokenType op;
         private readonly IExpression value;
         public Node TargetNode { get; set; }
+        private int stackSlot;
 
         
         public StmtVarAssign(Token ident, TokenType op, IExpression value)
@@ -341,6 +399,13 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TypePrim CheckTypes()
         {
             throw new System.NotImplementedException();
+        }
+        
+        public override void GenCode(CodeWriter w)
+        {
+            if (value == null) return;
+            value.GenCode(w);
+            w.Write(Instructions.Ret);
         }
     }
 
@@ -369,6 +434,12 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TypePrim CheckTypes()
         {
             return fnCall.CheckTypes();
+        }
+
+        public override void GenCode(CodeWriter w)
+        {
+            fnCall.GenCode(w);
+            w.Write(Instructions.Pop);
         }
     }
 }

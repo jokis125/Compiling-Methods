@@ -74,5 +74,10 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             throw new System.NotImplementedException();
         }
+
+        public override void GenCode(CodeWriter w)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

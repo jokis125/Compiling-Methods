@@ -10,6 +10,7 @@ namespace CompilingMethods.Classes.ParserScripts
     public abstract class IDeclares : Node
     {
        public abstract Token ReturnName();
+       public abstract List<Param> getParams();
     }
 
     public class DeclFn : IDeclares
@@ -19,6 +20,7 @@ namespace CompilingMethods.Classes.ParserScripts
         private readonly Token name;
         private readonly List<Param> parameters;
         private readonly TypePrim type;
+        private readonly Label startLabel = new Label();
 
         public DeclFn(TypePrim type, Token name, List<Param> parameters, List<IStatement> body)
         {
@@ -65,7 +67,18 @@ namespace CompilingMethods.Classes.ParserScripts
             body.ForEach(bod => bod.CheckTypes());
             return new TypePrim(null, PrimType.@void);
             //throw new System.NotImplementedException();
-            
+        }
+
+        public override List<Param> getParams()
+        {
+            return parameters;
+        }
+
+        public override void GenCode(CodeWriter w)
+        {
+            w.PlaceLabel(startLabel);
+            body.ForEach(bod => bod.GenCode(w));
+            w.Write(Instructions.Ret);
         }
     }
     
@@ -113,6 +126,16 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TypePrim CheckTypes()
         {
             throw new System.NotImplementedException();
+        }
+
+        public override List<Param> getParams()
+        {
+            throw new InvalidOperationException("Can't get params from var");
+        }
+
+        public override void GenCode(CodeWriter w)
+        {
+            throw new NotImplementedException();
         }
     }
 }

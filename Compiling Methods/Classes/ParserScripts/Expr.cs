@@ -55,7 +55,15 @@ namespace CompilingMethods.Classes.ParserScripts
             return Lit;
         }
 
-
+        public override void GenCode(CodeWriter w)
+        {
+            if(TargetNode.GetType().GetField("stackSlot") != null)
+                w.Write(Instructions.GetL); //TODO @target_node.stack_slot
+            else if (TargetNode.GetType().GetField("globalSlot") != null)
+                w.Write(Instructions.GetG); //TODO @target_node.global_slot;
+            else
+                throw new SystemException("bad variable");
+        }
     }
 
     public class ExprConst : IExpression
@@ -104,6 +112,18 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             return constant.State;
         }
+
+        public override void GenCode(CodeWriter w)
+        {
+            switch (constant.State)
+            {
+                case TokenType.LitInt:
+                    w.Write(Instructions.IntPush, constant.Value);
+                    break;
+                default: 
+                    throw new SystemException("bad literal");
+            }
+        }
     }
 
     public class ExprBin : IExpression
@@ -146,6 +166,36 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TokenType GetTokenType()
         {
             return left.GetTokenType();
+        }
+
+        public override void GenCode(CodeWriter w)
+        {
+            left.GenCode(w);
+            right.GenCode(w);
+
+            switch (op)
+            {
+                case ExprBinKind.Add:
+                    w.Write(Instructions.IntAdd);
+                    break;
+                case ExprBinKind.Sub:
+                    w.Write(Instructions.IntSub);
+                    break;
+                case ExprBinKind.Mul:
+                    w.Write(Instructions.IntMul);
+                    break;
+                case ExprBinKind.Div:
+                    w.Write(Instructions.IntDiv);
+                    break;
+                case ExprBinKind.Less:
+                    w.Write(Instructions.IntLess);
+                    break;
+                case ExprBinKind.Equal:
+                    w.Write(Instructions.IntEqual);
+                    break;
+                default:
+                    throw new NotImplementedException($"{op} not implemented");
+            }
         }
     }
 
@@ -306,6 +356,16 @@ namespace CompilingMethods.Classes.ParserScripts
             }
 
             return (TargetNode as DeclFn).Type;
+        }
+
+        public override void GenCode(CodeWriter w)
+        {
+            w.Write(Instructions.CallBegin);
+            foreach (var expression in args)
+            {
+                expression.GenCode(w);
+            }
+            w.Write(Instructions.Call, args.Count); //@targetnode,startlabel??????????
         }
     }
 }
