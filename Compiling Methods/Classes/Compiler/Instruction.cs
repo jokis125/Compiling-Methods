@@ -6,7 +6,7 @@ namespace CompilingMethods.Classes.Compiler
     {
         private int opcode;
         private Instructions name;
-        private int numOps;
+        private int numOps; 
 
         public Instruction(int opcode, Instructions name, int numOps)
         {
