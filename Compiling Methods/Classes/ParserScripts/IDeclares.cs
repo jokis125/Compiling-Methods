@@ -20,7 +20,10 @@ namespace CompilingMethods.Classes.ParserScripts
         private readonly Token name;
         private readonly List<Param> parameters;
         private readonly TypePrim type;
-        private readonly Label startLabel = new Label();
+
+        public Label StartLabel { get; set; } = new Label();
+
+        private int numLocals;
 
         public DeclFn(TypePrim type, Token name, List<Param> parameters, List<IStatement> body)
         {
@@ -33,6 +36,8 @@ namespace CompilingMethods.Classes.ParserScripts
             this.name = name;
             this.parameters = parameters;
             this.body = body;
+            locationToken = name;
+            StartLabel = new Label();
         }
 
         public List<Param> Parameters => parameters;
@@ -55,10 +60,16 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void ResolveNames(Scope parentScope)
         {
-            GlobalVars.StackSlotIndex = 0;
+            if (name.Value.Equals("main"))
+            {
+                var program = FindAncestor(typeof(Root));
+                ((Root) program).MainLabel = StartLabel;
+            }
+            Scope.StackSlotIndex = 0;
             var scope = new Scope(parentScope);
             parameters.ForEach(param => param.ResolveNames(scope));
             body.ForEach(bod => bod.ResolveNames(scope));
+            numLocals = Scope.StackSlotIndex;
         }
 
         public override TypePrim CheckTypes()
@@ -76,8 +87,14 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
-            w.PlaceLabel(startLabel);
-            body.ForEach(bod => bod.GenCode(w));
+            w.PlaceLabel(StartLabel);
+            if(numLocals > 0)
+                w.Write(Instructions.Alloc, numLocals);
+            //body.ForEach(bod => bod.GenCode(w));
+            foreach (var bod in body)
+            {
+                bod.GenCode(w);
+            }
             w.Write(Instructions.Ret);
         }
     }
@@ -118,7 +135,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void ResolveNames(Scope scope)
         {
-            stackSlot = GlobalVars.StackSlotIndex++;
+            stackSlot = Scope.StackSlotIndex++;
             scope.Add(ident.Value, this);
             value.ResolveNames(scope);
         }

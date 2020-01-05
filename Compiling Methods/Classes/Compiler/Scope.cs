@@ -8,6 +8,8 @@ namespace CompilingMethods.Classes.Compiler
 {
     public class Scope
     {
+        public static int StackSlotIndex;
+        
         private Scope parentScope;
         private Dictionary<String, Node> members = new Dictionary<String, Node>();
 

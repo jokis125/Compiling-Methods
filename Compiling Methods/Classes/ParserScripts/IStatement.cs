@@ -65,6 +65,8 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             AddChildren(statements.ToArray());
             this.statements = statements;
+            if (statements.Any())
+                locationToken = statements[0].locationToken;
         }
 
         public override void PrintNode(AstPrinter p)
@@ -222,7 +224,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
-            w.Write(Instructions.Br); //TODO :LOOP_END
+            w.Write(Instructions.Br, 456465456);
         }
     }
     
@@ -309,16 +311,23 @@ namespace CompilingMethods.Classes.ParserScripts
         
         public override void GenCode(CodeWriter w)
         {
-            w.Write(Instructions.Br); //TODO :LOOP_END
+            var startL = new Label();
+            var endL = new Label();
+            w.PlaceLabel(startL);
+            condition.GenCode(w);
+            w.Write(Instructions.Bz, endL);
+            body.GenCode(w);
+            w.Write(Instructions.Br, startL);
+            w.PlaceLabel(endL);
         }
     }
 
-    public class StmtVar : IStatement
+    public class StmtVar : IStatement, IStackSlot
     {
         private readonly Token ident;
         private readonly TypePrim type;
         private readonly IExpression value;
-        private int stackSlot;
+        public int StackSlot { get; set; }
 
         public TypePrim Type => type;
 
@@ -347,33 +356,33 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void ResolveNames(Scope scope)
         {
-            stackSlot = GlobalVars.StackSlotIndex++;
-            scope.Add(ident, this);
+            StackSlot = Scope.StackSlotIndex;
+            Scope.StackSlotIndex++;
             value?.ResolveNames(scope);
+            scope.Add(ident, this);
         }
 
         public override TypePrim CheckTypes()
         {
-            var exprType = value.CheckTypes();
+            var exprType = value?.CheckTypes();
             TypeHelper.UnifyTypes(type, exprType);
             return new TypePrim(null, PrimType.@void);
         }
 
         public override void GenCode(CodeWriter w)
         {
-            if (value == null) return;
-            value.GenCode(w);
-            w.Write(Instructions.Ret);
+            value?.GenCode(w);
+            w.Write(Instructions.SetL, StackSlot);
         }
     }
 
-    public class StmtVarAssign : IStatement
+    public class StmtVarAssign : IStatement, IStackSlot
     {
         private readonly Token ident;
         private readonly TokenType op;
         private readonly IExpression value;
         public Node TargetNode { get; set; }
-        private int stackSlot;
+        public int StackSlot { get; set; }
 
         
         public StmtVarAssign(Token ident, TokenType op, IExpression value)
@@ -393,19 +402,21 @@ namespace CompilingMethods.Classes.ParserScripts
         public override void ResolveNames(Scope scope)
         {
             TargetNode = scope.ResolveName(ident);
+            StackSlot = Scope.StackSlotIndex;
             value.ResolveNames(scope);
         }
         
         public override TypePrim CheckTypes()
         {
-            throw new System.NotImplementedException();
+            var exprType = value.CheckTypes();
+            return new TypePrim(null, PrimType.@void);
         }
         
         public override void GenCode(CodeWriter w)
         {
-            if (value == null) return;
             value.GenCode(w);
-            w.Write(Instructions.Ret);
+            w.Write(Instructions.SetL, StackSlot);
+            //w.Write(Instructions.Ret);
         }
     }
 
@@ -427,7 +438,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void ResolveNames(Scope scope)
         {
-            //TargetNode = scope.ResolveName(fnCall.GetToken());
+            TargetNode = scope.ResolveName(fnCall.GetToken());
             fnCall.ResolveNames(scope);
         }
 
@@ -438,6 +449,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
+            w.Write(Instructions.CallBegin);
             fnCall.GenCode(w);
             w.Write(Instructions.Pop);
         }

@@ -20,6 +20,7 @@ namespace CompilingMethods.Classes.ParserScripts
         public ExprVar(Token lit)
         {
             Lit = lit;
+            locationToken = lit;
         }
 
         private Token Lit { get; }
@@ -57,12 +58,10 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
-            if(TargetNode.GetType().GetField("stackSlot") != null)
-                w.Write(Instructions.GetL); //TODO @target_node.stack_slot
-            else if (TargetNode.GetType().GetField("globalSlot") != null)
-                w.Write(Instructions.GetG); //TODO @target_node.global_slot;
+            if(TargetNode is IStackSlot slot)
+                w.Write(Instructions.GetL, slot.StackSlot);
             else
-                throw new SystemException("bad variable");
+                throw new Exception("Stack slot or global slot do not exist");
         }
     }
 
@@ -118,7 +117,7 @@ namespace CompilingMethods.Classes.ParserScripts
             switch (constant.State)
             {
                 case TokenType.LitInt:
-                    w.Write(Instructions.IntPush, constant.Value);
+                    w.Write(Instructions.Push, constant.Value as int?);
                     break;
                 default: 
                     throw new SystemException("bad literal");
@@ -138,6 +137,7 @@ namespace CompilingMethods.Classes.ParserScripts
             this.left = left;
             this.op = op;
             this.right = right;
+            locationToken = left.locationToken;
         }
 
         public override void PrintNode(AstPrinter p)
@@ -192,6 +192,18 @@ namespace CompilingMethods.Classes.ParserScripts
                     break;
                 case ExprBinKind.Equal:
                     w.Write(Instructions.IntEqual);
+                    break;
+                case ExprBinKind.NotEqual:
+                    w.Write(Instructions.IntNotEqual);
+                    break;
+                case ExprBinKind.LessEqual:
+                    w.Write(Instructions.IntLessEqual);
+                    break;
+                case ExprBinKind.More:
+                    w.Write(Instructions.IntMore);
+                    break;
+                case ExprBinKind.MoreEqual:
+                    w.Write(Instructions.IntMoreEqual);
                     break;
                 default:
                     throw new NotImplementedException($"{op} not implemented");
@@ -334,7 +346,7 @@ namespace CompilingMethods.Classes.ParserScripts
                 return null;
             }
 
-            var paramTypes = (TargetNode as DeclFn).Parameters.Select(x => x.Type).ToList();
+            var paramTypes = (TargetNode as DeclFn)?.Parameters.Select(x => x.Type).ToList();
             if (argTypes.Count != paramTypes.Count)
             {
                 TypeHelper.SemanticError(ident, "Invalid function argument count");
@@ -355,7 +367,7 @@ namespace CompilingMethods.Classes.ParserScripts
                 TypeHelper.UnifyTypes(paramType, argType);
             }
 
-            return (TargetNode as DeclFn).Type;
+            return (TargetNode as DeclFn)?.Type;
         }
 
         public override void GenCode(CodeWriter w)
@@ -365,7 +377,7 @@ namespace CompilingMethods.Classes.ParserScripts
             {
                 expression.GenCode(w);
             }
-            w.Write(Instructions.Call, args.Count); //@targetnode,startlabel??????????
+            w.Write(Instructions.Call, (TargetNode as DeclFn)?.StartLabel, args.Count); //@targetnode,startlabel??????????
         }
     }
 }

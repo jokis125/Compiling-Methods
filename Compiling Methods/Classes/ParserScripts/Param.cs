@@ -3,17 +3,18 @@ using CompilingMethods.Classes.Lexer;
 
 namespace CompilingMethods.Classes.ParserScripts
 {
-    public class Param : Node
+    public class Param : Node, IStackSlot
     {
         private readonly Token name;
         private readonly TypePrim type;
-        private int stackSlot;
+        public int StackSlot { get; set; }
 
         public Param(Token name, TypePrim type)
         {
             AddChildren(type);
             this.name = name;
             this.type = type;
+            locationToken = name;
         }
 
         public override void PrintNode(AstPrinter p)
@@ -24,7 +25,8 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void ResolveNames(Scope scope)
         {
-            stackSlot = GlobalVars.StackSlotIndex++;
+            StackSlot = Scope.StackSlotIndex;
+            Scope.StackSlotIndex++;
             scope.Add(name, this);
         }
 
@@ -39,5 +41,7 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             throw new System.NotImplementedException();
         }
+
+        
     }
 }

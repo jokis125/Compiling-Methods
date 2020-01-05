@@ -6,7 +6,7 @@ namespace CompilingMethods.Classes.Compiler
     public class Label
     {
         private List<int> offsets = new List<int>();
-        private int value = 0;
+        private int value = -1;
 
         public List<int> Offsets
         {

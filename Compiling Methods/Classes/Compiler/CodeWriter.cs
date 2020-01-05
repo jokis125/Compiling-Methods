@@ -7,35 +7,39 @@ namespace CompilingMethods.Classes.Compiler
 {
     public class CodeWriter
     {
-        List<int> code = new List<int>();
+        public List<int> Code { get; set; } = new List<int>();
 
         private void CompleteLabel(Label label, int value)
         {
             label.Value = value;
             foreach (var offset in label.Offsets)
             {
-                code[offset] = value;
+                Code[offset] = value;
             }
         }
 
         public void DumpCode()
         {
             var offset = 0;
-            while(offset < code.Count)
+            while(offset < Code.Count - 1)
             {
-                var opcode = code[offset];
+                var opcode = Code[offset];
                 Instruction instr;
                 GlobalVars.InstrsByOpCode.TryGetValue(opcode, out instr);
-                var op1 = code[offset + 1];
-                var op2 = code[instr.NumOps];
-                Console.WriteLine($"{offset}: {opcode} {instr.Name} {op1}, {op2}");
+                var op1 = Code[offset + 1];
+                var op2 = instr.NumOps > 0 ? Code[instr.NumOps] : -1;
+                //Console.WriteLine($"{offset.ToString()}: {opcode.ToString()} {instr.Name} {op1}, {op2}");
+                Console.WriteLine($"{offset.ToString().PadLeft(3)}: 0x{opcode.ToString("X")}|{opcode.ToString()} - {instr.Name.ToString().PadRight(13)} {(String.Join(" ", Code.GetRange(offset + 1, instr.NumOps)))}");
                 offset += 1 + instr.NumOps;
             }
+            
+            Console.WriteLine("Code: ");
+            Console.WriteLine($"[{String.Join(", ", Code)}]");
         }
 
         public void PlaceLabel(Label label)
         {
-            CompleteLabel(label, code.Count);
+            CompleteLabel(label, Code.Count);
         }
 
         public void Write(Instructions instrName, params Object[] ops)
@@ -45,18 +49,24 @@ namespace CompilingMethods.Classes.Compiler
             if(ops.Length != instr.NumOps)
                 throw new SystemException("invalid instruction operand count");
             
-            code.Add(instr.Opcode);
+            Code.Add(instr.Opcode);
+
             foreach (var op in ops)
             {
-                if(op.GetType() != typeof(Label))
-                    code.Add((int)op);
-                else if (((Label)op).Value <= 0)
+                if (op is Label label)
                 {
-                    ((Label)op).Offsets.Add(code.Count);
+                    if (label.Value == -1)
+                    {
+                        label.Offsets.Add(Code.Count);
+                        Code.Add(666);
+                    }
+                    else
+                        Code.Add(label.Value);
                 }
                 else
                 {
-                    code.Add(((Label)op).Value);
+                    var aa = (int) op;
+                    Code.Add(aa);
                 }
             }
         }

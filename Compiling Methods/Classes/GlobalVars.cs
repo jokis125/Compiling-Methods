@@ -6,7 +6,6 @@ namespace CompilingMethods.Classes
 {
     public class GlobalVars
     {
-        public static int StackSlotIndex = 0;
         public static string FileName;
         public static Dictionary<Instructions, Instruction> InstrsByName = new Dictionary<Instructions, Instruction>();
         public static Dictionary<int, Instruction> InstrsByOpCode = new Dictionary<int, Instruction>();

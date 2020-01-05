@@ -1,6 +1,64 @@
-int a()
+/*int main()
 {
-    int asaaa = "asd";
-    return "as";
+    return fib(1) + fib(3);
 }
 
+int fib(int x)
+{
+    if(x == 0)
+    {
+        return 0;
+    }
+    else if(x == 1)
+    {
+        return 1;
+    }
+    else
+    {
+        return fib(x - 2) + fib (x - 1);
+    }
+}
+*/
+
+int main()
+{
+/*
+    int i = 1;
+    int a = 3;
+    int c = 4;
+    //int nextTerm = a + c; //7
+    a = c; //4
+    //c = nextTerm; // 7
+    //nextTerm = a + c; // 4 + 7
+    return a;
+
+    
+    int i = 1;
+    int a = 3;
+    int c = 4;
+    int b = 2;
+    int baba = a + c;
+    i = c;
+    return i;
+
+     int i = 2;
+     int a = 5;
+     int c = 4;
+     int d = 5;
+     c = c + 5;
+     return c;
+      */
+      
+      while(1 == 1)
+      {
+        while(3 < 5)
+        {
+            break;
+            return 3;
+            
+            return 5;
+        }
+        return 2;
+      }
+    return 1;
+}

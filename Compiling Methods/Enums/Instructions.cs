@@ -13,13 +13,14 @@ namespace CompilingMethods.Enums
         IntLessEqual,
         IntMoreEqual,
         IntEqual,
+        IntNotEqual,
         //stack instructions
         GetL,
         SetL,
         GetG,
         SetG,
         Pop,
-        IntPush,
+        Push,
         //Control
         Br,
         Bz,
@@ -27,6 +28,10 @@ namespace CompilingMethods.Enums
         Ret,
         RetV,
         CallBegin,
-        Call
+        Call,
+        //
+        Exit,
+        Alloc
+        
     }
 }

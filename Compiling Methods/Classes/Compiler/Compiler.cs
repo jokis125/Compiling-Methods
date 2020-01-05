@@ -51,7 +51,7 @@ namespace CompilingMethods.Classes.Compiler
                 return;
             }
             var printer = new AstPrinter();
-            printer.Print("root", root);
+            //printer.Print("root", root);
 
             var rootScope = new Scope(null, lexer.GetScriptName());
             try
@@ -65,11 +65,12 @@ namespace CompilingMethods.Classes.Compiler
                 Console.WriteLine(e.Message);
                 throw;
             }
+            
             PushInstructions();
-
+            var writer = new CodeWriter();
             try
             {
-                var writer = new CodeWriter();
+                
                 root.GenCode(writer);
                 writer.DumpCode();
             }
@@ -78,6 +79,10 @@ namespace CompilingMethods.Classes.Compiler
                 Console.WriteLine(e);
                 throw;
             }
+            
+            var interpreter = new Interpreter.Interpreter(writer.Code);
+            interpreter.Exec();
+            
         }
 
         private void PushInstructions()
@@ -97,14 +102,17 @@ namespace CompilingMethods.Classes.Compiler
             Instruction.AddInstruction(0x30, Instructions.GetL, 1);
             Instruction.AddInstruction(0x31, Instructions.SetL, 1);
             Instruction.AddInstruction(0x32, Instructions.Pop, 0);
-            Instruction.AddInstruction(0x33, Instructions.IntPush, 1);
+            Instruction.AddInstruction(0x33, Instructions.Push, 1);
             //Control
             Instruction.AddInstruction(0x40, Instructions.Br, 1);
             Instruction.AddInstruction(0x41, Instructions.Bz, 1);
             Instruction.AddInstruction(0x42, Instructions.Ret, 0);
             Instruction.AddInstruction(0x43, Instructions.RetV, 0);
-            Instruction.AddInstruction(0x45, Instructions.CallBegin, 0);
-            Instruction.AddInstruction(0x46, Instructions.Call, 2);
+            Instruction.AddInstruction(0x44, Instructions.CallBegin, 0);
+            Instruction.AddInstruction(0x45, Instructions.Call, 2);
+            
+            Instruction.AddInstruction(0x46, Instructions.Exit, 0);
+            Instruction.AddInstruction(0x47, Instructions.Alloc, 1);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using CompilingMethods.Classes.Compiler;
 using CompilingMethods.Classes.Lexer;
 using CompilingMethods.Enums;
@@ -9,6 +10,7 @@ namespace CompilingMethods.Classes.ParserScripts
     public abstract class Node
     {
         public Node parent = null;
+        public Token locationToken;
         public abstract void PrintNode(AstPrinter p);
         public abstract void ResolveNames(Scope scope);
         public abstract TypePrim CheckTypes();
@@ -41,10 +43,15 @@ namespace CompilingMethods.Classes.ParserScripts
     {
         private readonly List<IDeclares> decls;
 
+        public Label MainLabel { get; set; }
+
         public Root(List<IDeclares> decls)
         {
             AddChildren(decls.ToArray());
             this.decls = decls;
+            if (decls.Any())
+                locationToken = decls[0].locationToken;
+            this.MainLabel = new Label();
         }
 
         public override void PrintNode(AstPrinter p)
@@ -69,6 +76,9 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
+            w.Write(Instructions.CallBegin);
+            w.Write(Instructions.Call, MainLabel, 0);
+            w.Write(Instructions.Exit);
             foreach (var declares in decls)
             {
                 declares.GenCode(w);
