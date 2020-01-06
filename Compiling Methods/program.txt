@@ -66,8 +66,7 @@ int b(int x)
 {
     return 0;
 }
-*/
-/*
+
 int main()
 {
 
@@ -88,24 +87,9 @@ int main()
 }
 
 */
-/* KAI MAIN TUSCIAS NO RET, BET KAI KITOS FUNKCIJOS YRA ATSIRANDA RET????
-int main()
-{
-     
-}
-
-void aaaa()
-{
-
-}
-
-int hello()
-{
-    return 3;
-}
-*/
 
 int main()
 {
-     
+     printFloat(3.22232 + 3.22322);
+     return 10;
 }

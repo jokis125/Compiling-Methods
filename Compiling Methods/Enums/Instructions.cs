@@ -7,6 +7,10 @@ namespace CompilingMethods.Enums
         IntSub,
         IntMul,
         IntDiv,
+        FloatAdd,
+        FloatSub,
+        FloatMul,
+        FloatDiv,
         //comparison
         IntLess,
         IntMore,
@@ -33,7 +37,9 @@ namespace CompilingMethods.Enums
         Exit,
         Alloc,
         Read,
-        Print
+        Print,
+        PrintString,
+        PrintFloat
         //Print
         
     }

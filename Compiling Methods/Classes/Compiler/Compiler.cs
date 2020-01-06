@@ -63,17 +63,16 @@ namespace CompilingMethods.Classes.Compiler
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                //throw;
+                throw;
             }
             try
             {
                 root.CheckTypes();
-                
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                //throw;
+                throw;
             }
             
             if(!GlobalVars.running)
@@ -93,7 +92,7 @@ namespace CompilingMethods.Classes.Compiler
                 
             }
 
-            var interpreter = new Interpreter.Interpreter(writer.Code);
+            var interpreter = new Interpreter.Interpreter(writer.Code, CodeWriter.StringStorage);
             try
             {
                 interpreter.Exec();
@@ -138,6 +137,8 @@ namespace CompilingMethods.Classes.Compiler
             
             Instruction.AddInstruction(0x90, Instructions.Read, 0);
             Instruction.AddInstruction(0x91, Instructions.Print, 0);
+            Instruction.AddInstruction(0x92, Instructions.PrintString, 0);
+            Instruction.AddInstruction(0x93, Instructions.PrintFloat, 0);
         }
     }
 }

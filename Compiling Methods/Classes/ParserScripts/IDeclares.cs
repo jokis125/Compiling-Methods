@@ -70,6 +70,7 @@ namespace CompilingMethods.Classes.ParserScripts
                 ((Root) program).MainLabel = StartLabel;
             }
             Scope.StackSlotIndex = 0;
+            Scope.stringSlotIndex = 0;
             var scope = new Scope(parentScope);
             parameters.ForEach(param => param.ResolveNames(scope));
             body?.ForEach(bod => bod.ResolveNames(scope));

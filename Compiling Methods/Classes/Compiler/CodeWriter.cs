@@ -8,6 +8,7 @@ namespace CompilingMethods.Classes.Compiler
     public class CodeWriter
     {
         public List<int> Code { get; set; } = new List<int>();
+        public static List<string> StringStorage = new List<string>();
 
         private void CompleteLabel(Label label, int value)
         {
@@ -59,6 +60,7 @@ namespace CompilingMethods.Classes.Compiler
                     if (label.Value == -1)
                     {
                         label.Offsets.Add(Code.Count);
+                        //throw new SystemException("666");
                         Code.Add(666);
                     }
                     else

@@ -63,10 +63,16 @@ namespace CompilingMethods.Classes.ParserScripts
         {
             var printToken = new Token(TokenType.Print, "printInt", 0);
             var readToken = new Token(TokenType.Read, "readInt", 0);
+            var printStringToken = new Token(TokenType.PrintString, "printString", 0);
+            var printFloatToken = new Token(TokenType.PrintFloat, "printFloat", 0);
             var printType = new TypePrim(printToken);
             var readType = new TypePrim(readToken);
+            var printStringType = new TypePrim(printStringToken);
+            var printFloatType = new TypePrim(printFloatToken);
             
-            scope.Add(printToken, new DeclFn(printType, printToken, new List<Param> { new Param(printToken, new TypePrim(new Token(TokenType.Void, null, 0)))}, null));
+            scope.Add(printToken, new DeclFn(printType, printToken, new List<Param> { new Param(printToken, new TypePrim(new Token(TokenType.Int, null, 0)))}, null));
+            scope.Add(printStringToken, new DeclFn(printStringType, printStringToken, new List<Param> { new Param(printStringToken, new TypePrim(new Token(TokenType.String, null, 0)))}, null));
+            scope.Add(printFloatToken, new DeclFn(printFloatType, printFloatToken, new List<Param> { new Param(printFloatToken, new TypePrim(new Token(TokenType.Float, null, 0)))}, null));
             scope.Add(readToken, new DeclFn(readType, readToken, new List<Param>(),null));
 
             decls.ForEach(decl => scope.Add(decl.ReturnName(), decl));

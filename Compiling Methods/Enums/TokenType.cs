@@ -51,5 +51,7 @@ namespace CompilingMethods.Enums
         Eof,
         Print,
         Read,
+        PrintString,
+        PrintFloat,
     }
 }

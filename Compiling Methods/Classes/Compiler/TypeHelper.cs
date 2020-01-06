@@ -12,6 +12,7 @@ namespace CompilingMethods.Classes.Compiler
         {
             GlobalVars.running = false;
             var lineN = token.LineN;
+            throw new SystemException($"{GlobalVars.FileName}:{lineN}: error: {message}");
             Console.WriteLine($"{GlobalVars.FileName}:{lineN}: error: {message}");
         }
         

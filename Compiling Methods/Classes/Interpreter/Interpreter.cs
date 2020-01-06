@@ -8,21 +8,33 @@ namespace CompilingMethods.Classes.Interpreter
     public class Interpreter
     {
         List<int> memory = new List<int>(4096);
+        List<string> stringMemory = new List<string>(50);
         private bool running = true;
         private int ip = 0;
         private int fp = 1024;
         private int sp = 1024;
 
-        public Interpreter(List<int> code)
+        public Interpreter(List<int> code, List<string> strings = null)
         {
             for (var i = 0; i < 4096; ++i)
             {
                 memory.Add(0);
             }
+            
+            for (var i = 0; i < 50; ++i)
+                stringMemory.Add("");
 
             for (var i = 0; i < code.Count; i++)
             {
                 memory[i] = code[i];
+            }
+
+            if (strings != null)
+            {
+                for (var i = 0; i < strings.Count; i++)
+                {
+                    stringMemory[i] = strings[i];
+                }
             }
         }
 
@@ -45,6 +57,13 @@ namespace CompilingMethods.Classes.Interpreter
                     b = Pop();
                     a = Pop();
                     Push(a + b);
+                    break;
+                case Instructions.FloatAdd:
+                    b = Pop();
+                    a = Pop();
+                    float aa = Program.Int32BitsToSingle(a);
+                    float bb = Program.Int32BitsToSingle(b);
+                    Push(Program.SingleToInt32Bits(aa + bb));
                     break;
                 case Instructions.IntSub:
                     b = Pop();
@@ -123,6 +142,14 @@ namespace CompilingMethods.Classes.Interpreter
                 case Instructions.Print:
                     a = Pop();
                     Console.WriteLine(a);
+                    break;
+                case Instructions.PrintFloat:
+                    a = Pop();
+                    Console.WriteLine(Program.Int32BitsToSingle(a));
+                    break;
+                case Instructions.PrintString:
+                    a = Pop();
+                    Console.WriteLine(stringMemory[a]);
                     break;
                 case Instructions.Exit:
                     running = false;

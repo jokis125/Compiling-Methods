@@ -119,11 +119,18 @@ namespace CompilingMethods.Classes.ParserScripts
                 case TokenType.LitInt:
                     w.Write(Instructions.Push, constant.Value as int?);
                     break;
+                case TokenType.LitFloat:
+                    w.Write(Instructions.Push, Program.SingleToInt32Bits((float)constant.Value));
+                    break;
                 case TokenType.True:
                     w.Write(Instructions.Push, 1);
                     break;
                 case TokenType.False:
                     w.Write(Instructions.Push, 0);
+                    break;
+                case TokenType.LitStr:
+                    CodeWriter.StringStorage.Add(constant.Value as string);
+                    w.Write(Instructions.Push, Scope.stringSlotIndex++);
                     break;
                 default: 
                     throw new SystemException("Could not generate code");
@@ -379,6 +386,34 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
+            if (ident.Value is string newName)
+            {
+                if (newName == "printInt")
+                {
+                    Args.ForEach(arg => arg.GenCode(w));
+                    w.Write(Instructions.Print);
+                    return;
+                }
+                else if (newName == "readInt")
+                {
+                    Args.ForEach(arg => arg.GenCode(w));
+                    w.Write(Instructions.Read);
+                    return;
+                }
+                else if (newName == "printString")
+                {
+                    Args.ForEach(arg => arg.GenCode(w));
+                    w.Write(Instructions.PrintString);
+                    return;
+                }
+                else if (newName == "printFloat")
+                {
+                    Args.ForEach(arg => arg.GenCode(w));
+                    w.Write(Instructions.PrintFloat);
+                    return;
+                }
+            }
+            
             w.Write(Instructions.CallBegin);
             foreach (var expression in Args)
             {

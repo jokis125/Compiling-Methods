@@ -18,6 +18,9 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public StmtBlock ElseBody { get; }
 
+        public Label ElseLabel;
+        public Label AfterElseLabel;
+
         public StmtIf(List<Branch> branches, StmtBlock elseBody)
         {
             var temp = new Node[branches.Count + 1];
@@ -27,6 +30,10 @@ namespace CompilingMethods.Classes.ParserScripts
             AddChildren(elseBody);
             this.Branches = branches;
             this.ElseBody = elseBody;
+            
+            ElseLabel = new Label();
+            AfterElseLabel = new Label();
+            
         }
 
         public override void PrintNode(AstPrinter p)
@@ -50,11 +57,8 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
-            var endL = new Label();
             Branches.ForEach(branch => branch.GenCode(w));
             ElseBody?.GenCode(w);
-            w.PlaceLabel(endL);
-            
         }
     }
 
@@ -89,21 +93,29 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
+            if(parent is StmtIf par)
+                w.PlaceLabel(par.ElseLabel);
             statements.ForEach(s => s.GenCode(w));
+            if(parent is StmtIf par2)
+                w.PlaceLabel(par2.AfterElseLabel);
         }
     }
 
     public class Branch : Node
     {
 
+        public IExpression Condition { get; }
+        public StmtBlock Body { get; }
+
+        public Label EndLabel;
         public Branch(IExpression condition, StmtBlock body)
         {
             Condition = condition;
             Body = body;
+            
+            EndLabel = new Label();
         }
 
-        public IExpression Condition { get; }
-        public StmtBlock Body { get; }
 
         public override void PrintNode(AstPrinter p)
         {
@@ -112,6 +124,8 @@ namespace CompilingMethods.Classes.ParserScripts
             AddChildren(Body);
             p.Print("Cond", Condition);
             p.Print("Body", Body);
+            
+            
         }
 
         public override void ResolveNames(Scope scope)
@@ -130,47 +144,42 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
-            var endL = new Label();
             Condition.GenCode(w);
-            w.Write(Instructions.Bz, endL);
-            Body.GenCode(w);
-            w.PlaceLabel(endL);
-            
-            /*Condition.GenCode(w);
-
             if (parent is StmtIf ifNode)
             {
                 if (ifNode.ElseBody != null && ifNode.Branches[^1] == this)
                 {
-                    //w.Write(Instructions.Bz, ifNode.ElseLabel);
+                    w.Write(Instructions.Bz, ifNode.ElseLabel);
                 }
                 else if (ifNode.ElseBody == null && ifNode.Branches[^1] == this)
                 {
-                    //w.Write(Instructions.Bz, ifNode.AfterElseLabel);
+                    w.Write(Instructions.Bz, ifNode.AfterElseLabel);
                 }
                 else
                 {
-                    //w.Write(Instructions.Bz, ifNode.endLabel);
+                    w.Write(Instructions.Bz, EndLabel);
                 }
             }
+            
+            Body.GenCode(w);
 
             if (parent is StmtIf ifNode2)
             {
                 if (ifNode2.ElseBody != null && ifNode2.Branches[^1] == this)
                 {
-                    //w.Write(Instructions.Br, ifNode2.AfterElseLabel);
+                    w.Write(Instructions.Br, ifNode2.AfterElseLabel);
                 }
                 else if (ifNode2.ElseBody == null && ifNode2.Branches[^1] == this)
                 {
-                    //w.PlaceLabel(ifNode2.afterElseLabel);
+                    w.PlaceLabel(ifNode2.AfterElseLabel);
                 }
                 else
                 {
-                    //w.Write(Instructions.Br, ifNode2.AfterElseLabel);
-                    //w.PlaceLabel(endLabel);
+                    w.Write(Instructions.Br, ifNode2.AfterElseLabel);
+                    w.PlaceLabel(EndLabel);
                 }
             }
-            Body.GenCode(w);*/
+
         }
         
     }
@@ -301,7 +310,6 @@ namespace CompilingMethods.Classes.ParserScripts
                     break;
                 }
                 currNode = currNode.parent;
-
             }
 
             if (targetNode == null)
@@ -322,7 +330,7 @@ namespace CompilingMethods.Classes.ParserScripts
         
         public override void GenCode(CodeWriter w)
         {
-            w.Write(Instructions.Cn); //TODO :LOOP_END
+            w.Write(Instructions.Br, startLabel); //TODO :LOOP_END
         }
     }
     
@@ -521,6 +529,18 @@ namespace CompilingMethods.Classes.ParserScripts
                 {
                     (fnCall as ExprFnCall)?.Args.ForEach(arg => arg.GenCode(w));
                     w.Write(Instructions.Read);
+                    return;
+                }
+                if (name == "printString")
+                {
+                    (fnCall as ExprFnCall)?.Args.ForEach(arg => arg.GenCode(w));
+                    w.Write(Instructions.PrintString);
+                    return;
+                }
+                else if (name == "printFloat")
+                {
+                    (fnCall as ExprFnCall)?.Args.ForEach(arg => arg.GenCode(w));
+                    w.Write(Instructions.PrintFloat);
                     return;
                 }
             }
