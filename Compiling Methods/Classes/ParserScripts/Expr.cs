@@ -119,8 +119,14 @@ namespace CompilingMethods.Classes.ParserScripts
                 case TokenType.LitInt:
                     w.Write(Instructions.Push, constant.Value as int?);
                     break;
+                case TokenType.True:
+                    w.Write(Instructions.Push, 1);
+                    break;
+                case TokenType.False:
+                    w.Write(Instructions.Push, 0);
+                    break;
                 default: 
-                    throw new SystemException("bad literal");
+                    throw new SystemException("Could not generate code");
             }
         }
     }

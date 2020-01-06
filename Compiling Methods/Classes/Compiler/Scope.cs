@@ -41,7 +41,7 @@ namespace CompilingMethods.Classes.Compiler
 
             if (parentScope != null)
                 return parentScope.ResolveName(nameToken);
-            throw new UndeclaredVariableException($"{GlobalVars.FileName}: {nameToken.LineN}: error: undeclared variable: '{name}'");
+            throw new UndeclaredVariableException($"{GlobalVars.FileName}:{nameToken.LineN}: error: undeclared variable: '{name}'");
         }
     }
 }

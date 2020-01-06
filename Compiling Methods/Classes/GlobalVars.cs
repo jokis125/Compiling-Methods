@@ -9,5 +9,6 @@ namespace CompilingMethods.Classes
         public static string FileName;
         public static Dictionary<Instructions, Instruction> InstrsByName = new Dictionary<Instructions, Instruction>();
         public static Dictionary<int, Instruction> InstrsByOpCode = new Dictionary<int, Instruction>();
+        public static bool running = true;
     }
 }

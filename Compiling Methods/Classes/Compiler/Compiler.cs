@@ -12,6 +12,7 @@ namespace CompilingMethods.Classes.Compiler
         private readonly Lexer.Lexer lexer = new Lexer.Lexer();
         private Parser parser;
         private bool mainFound = false;
+        private bool running = true;
         private Token eofToken;
         public void Compile()
         {
@@ -57,31 +58,52 @@ namespace CompilingMethods.Classes.Compiler
             try
             {
                 root.ResolveNames(rootScope);
+                
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                //throw;
+            }
+            try
+            {
                 root.CheckTypes();
+                
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                //throw;
             }
             
+            if(!GlobalVars.running)
+                return;
+            PushInstructions();
+            var writer = new CodeWriter();
+            try
+            {
+                root.GenCode(writer);
+                writer.DumpCode();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw;
+                return;
+                
+            }
+
+            var interpreter = new Interpreter.Interpreter(writer.Code);
+            try
+            {
+                interpreter.Exec();
+            }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 throw;
             }
             
-            PushInstructions();
-            var writer = new CodeWriter();
-            try
-            {
-                
-                root.GenCode(writer);
-                writer.DumpCode();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-            
-            var interpreter = new Interpreter.Interpreter(writer.Code);
-            interpreter.Exec();
             
         }
 

@@ -21,12 +21,13 @@ namespace CompilingMethods.Classes.Compiler
         public void DumpCode()
         {
             var offset = 0;
-            while(offset < Code.Count - 1)
+            while(offset < Code.Count)
             {
                 var opcode = Code[offset];
                 Instruction instr;
                 GlobalVars.InstrsByOpCode.TryGetValue(opcode, out instr);
-                var op1 = Code[offset + 1];
+                //var op1 = Code[offset + 1];
+                var op1 = instr.NumOps > 0 ? Code[offset + 1] : Code[offset];
                 var op2 = instr.NumOps > 0 ? Code[instr.NumOps] : -1;
                 //Console.WriteLine($"{offset.ToString()}: {opcode.ToString()} {instr.Name} {op1}, {op2}");
                 Console.WriteLine($"{offset.ToString().PadLeft(3)}: 0x{opcode.ToString("X")}|{opcode.ToString()} - {instr.Name.ToString().PadRight(13)} {(String.Join(" ", Code.GetRange(offset + 1, instr.NumOps)))}");

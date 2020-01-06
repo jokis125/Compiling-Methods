@@ -10,8 +10,9 @@ namespace CompilingMethods.Classes.Compiler
     {
         public static void SemanticError(Token token, string message)
         {
+            GlobalVars.running = false;
             var lineN = token.LineN;
-            Console.WriteLine($"{GlobalVars.FileName}:{lineN}: semantic error: {message}");
+            Console.WriteLine($"{GlobalVars.FileName}:{lineN}: error: {message}");
         }
         
         public static void TypesNotComparableError(PrimType type0, PrimType type1)

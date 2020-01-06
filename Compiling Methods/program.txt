@@ -3,26 +3,22 @@
     return fib(1) + fib(3);
 }
 
-int fib(int x)
-{
-    if(x == 0)
-    {
-        return 0;
-    }
-    else if(x == 1)
-    {
-        return 1;
-    }
-    else
-    {
-        return fib(x - 2) + fib (x - 1);
-    }
-}
-*/
+
+
 
 int main()
 {
-    return loopFib(15);
+    return loopFib(1);
+}
+
+int a()
+{
+    b(b);
+}
+
+int b(int x)
+{
+
 }
 
 int loopFib(int x)
@@ -41,4 +37,75 @@ int loopFib(int x)
             i = i + 1;    
         } 
         return next;
+}
+
+int fib(int x)
+{
+    if(x == 0)
+    {
+        return 0;
+    }
+    else if(x == 1)
+    {
+        return 1;
+    }
+    else
+    {
+        return fib(x - 2) + fib (x - 1);
+    }
+}
+
+
+int main()
+{
+    b(b);
+    
+}
+
+int b(int x)
+{
+    return 0;
+}
+*/
+/*
+int main()
+{
+
+    return 1;
+    while(true)
+    {
+        return 3;
+        while(false)
+        {
+            return 5;
+            continue;
+            return 6;
+        }
+        return 4;
+    }
+    return 2;
+      
+}
+
+*/
+/* KAI MAIN TUSCIAS NO RET, BET KAI KITOS FUNKCIJOS YRA ATSIRANDA RET????
+int main()
+{
+     
+}
+
+void aaaa()
+{
+
+}
+
+int hello()
+{
+    return 3;
+}
+*/
+
+int main()
+{
+     
 }

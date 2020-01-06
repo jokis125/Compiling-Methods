@@ -14,8 +14,9 @@ namespace CompilingMethods.Classes.ParserScripts
 
     public class StmtIf : IStatement
     {
-        private readonly List<Branch> branches;
-        private readonly StmtBlock elseBody;
+        public List<Branch> Branches { get; }
+
+        public StmtBlock ElseBody { get; }
 
         public StmtIf(List<Branch> branches, StmtBlock elseBody)
         {
@@ -24,34 +25,34 @@ namespace CompilingMethods.Classes.ParserScripts
             
             AddChildren(branches.ToArray());
             AddChildren(elseBody);
-            this.branches = branches;
-            this.elseBody = elseBody;
+            this.Branches = branches;
+            this.ElseBody = elseBody;
         }
 
         public override void PrintNode(AstPrinter p)
         {
-            p.Print("branch", branches);
-            p.Print("else body", elseBody);
+            p.Print("branch", Branches);
+            p.Print("else body", ElseBody);
         }
 
         public override void ResolveNames(Scope scope)
         {
-            branches.ForEach(branch => branch.ResolveNames(scope));
-            elseBody?.ResolveNames(scope);
+            Branches.ForEach(branch => branch.ResolveNames(scope));
+            ElseBody?.ResolveNames(scope);
         }
 
         public override TypePrim CheckTypes()
         {
-            branches.ForEach(branch => branch.CheckTypes());
-            elseBody?.CheckTypes();
+            Branches.ForEach(branch => branch.CheckTypes());
+            ElseBody?.CheckTypes();
             return new TypePrim(null, PrimType.@void);
         }
 
         public override void GenCode(CodeWriter w)
         {
             var endL = new Label();
-            branches.ForEach(branch => branch.GenCode(w));
-            elseBody.GenCode(w);
+            Branches.ForEach(branch => branch.GenCode(w));
+            ElseBody?.GenCode(w);
             w.PlaceLabel(endL);
             
         }
@@ -134,7 +135,44 @@ namespace CompilingMethods.Classes.ParserScripts
             w.Write(Instructions.Bz, endL);
             Body.GenCode(w);
             w.PlaceLabel(endL);
+            
+            /*Condition.GenCode(w);
+
+            if (parent is StmtIf ifNode)
+            {
+                if (ifNode.ElseBody != null && ifNode.Branches[^1] == this)
+                {
+                    //w.Write(Instructions.Bz, ifNode.ElseLabel);
+                }
+                else if (ifNode.ElseBody == null && ifNode.Branches[^1] == this)
+                {
+                    //w.Write(Instructions.Bz, ifNode.AfterElseLabel);
+                }
+                else
+                {
+                    //w.Write(Instructions.Bz, ifNode.endLabel);
+                }
+            }
+
+            if (parent is StmtIf ifNode2)
+            {
+                if (ifNode2.ElseBody != null && ifNode2.Branches[^1] == this)
+                {
+                    //w.Write(Instructions.Br, ifNode2.AfterElseLabel);
+                }
+                else if (ifNode2.ElseBody == null && ifNode2.Branches[^1] == this)
+                {
+                    //w.PlaceLabel(ifNode2.afterElseLabel);
+                }
+                else
+                {
+                    //w.Write(Instructions.Br, ifNode2.AfterElseLabel);
+                    //w.PlaceLabel(endLabel);
+                }
+            }
+            Body.GenCode(w);*/
         }
+        
     }
 
     public class StmtReturn : IStatement
@@ -163,7 +201,7 @@ namespace CompilingMethods.Classes.ParserScripts
         public override TypePrim CheckTypes()
         {
             var returnType = (FindAncestor(typeof(DeclFn)) as DeclFn)?.Type;
-            var valueType = expr != null ? expr.CheckTypes() : new TypePrim(null, PrimType.@void);
+            var valueType = expr != null ? expr.CheckTypes() : new TypePrim(new Token(TokenType.Void, kw.Value, kw.LineN));
             TypeHelper.UnifyTypes(returnType, valueType);
             return new TypePrim(null, PrimType.@void);
         }
