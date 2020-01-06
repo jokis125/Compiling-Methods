@@ -185,6 +185,8 @@ namespace CompilingMethods.Classes.ParserScripts
         private readonly Token kw;
         private Node TargetNode { get; set; }
 
+        public Label endLabel;
+
         public StmtBreak(Token kw)
         {
             this.kw = kw;
@@ -197,22 +199,27 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void ResolveNames(Scope scope)
         {
+            Node targetNode = null;
             var currNode = parent;
             while (currNode != null)
             {
                 if (currNode.GetType() == typeof(StmtWhile))
                 {
-                    TargetNode = currNode;
+                    targetNode = currNode;
                     break;
                 }
                 currNode = currNode.parent;
 
             }
 
-            if (TargetNode == null)
+            if (targetNode == null)
             {
                 Console.WriteLine($"{GlobalVars.FileName}:{kw.LineN}: error: Break not inside a loop");
             }
+
+            var program = FindAncestor(typeof(StmtWhile));
+            if (program != null)
+                endLabel = (program as StmtWhile)?.endLabel;
         }
         
 
@@ -224,7 +231,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
-            w.Write(Instructions.Br, 456465456);
+            w.Write(Instructions.Br, endLabel);
         }
     }
     
@@ -232,6 +239,7 @@ namespace CompilingMethods.Classes.ParserScripts
     {
         private readonly Token kw;
         private Node TargetNode { get; set; }
+        public Label startLabel;
 
         public StmtContinue(Token kw)
         {
@@ -246,21 +254,26 @@ namespace CompilingMethods.Classes.ParserScripts
         public override void ResolveNames(Scope scope)
         {
             var currNode = parent;
+            Node targetNode = null;
             while (currNode != null)
             {
                 if (currNode.GetType() == typeof(StmtWhile))
                 {
-                    TargetNode = currNode;
+                    targetNode = currNode;
                     break;
                 }
                 currNode = currNode.parent;
 
             }
 
-            if (TargetNode == null)
+            if (targetNode == null)
             {
                 Console.WriteLine($"{GlobalVars.FileName}:{kw.LineN}: error: Continue not inside a loop");
             }
+            
+            var program = FindAncestor(typeof(StmtWhile));
+            if (program != null)
+                startLabel = (program as StmtWhile)?.startLabel;
         }
 
         public override TypePrim CheckTypes()
@@ -282,11 +295,17 @@ namespace CompilingMethods.Classes.ParserScripts
         private readonly StmtBlock body;
         private readonly IExpression condition;
 
+        public Label startLabel;
+        public Label endLabel;
+
         public StmtWhile(IExpression condition, StmtBlock body)
         {
             AddChildren(condition, body);
             this.condition = condition;
             this.body = body;
+            
+            startLabel = new Label();
+            endLabel = new Label();
         }
 
         public override void PrintNode(AstPrinter p)
@@ -311,14 +330,14 @@ namespace CompilingMethods.Classes.ParserScripts
         
         public override void GenCode(CodeWriter w)
         {
-            var startL = new Label();
-            var endL = new Label();
-            w.PlaceLabel(startL);
+            //var startL = new Label();
+            //var endL = new Label();
+            w.PlaceLabel(startLabel);
             condition.GenCode(w);
-            w.Write(Instructions.Bz, endL);
+            w.Write(Instructions.Bz, endLabel);
             body.GenCode(w);
-            w.Write(Instructions.Br, startL);
-            w.PlaceLabel(endL);
+            w.Write(Instructions.Br, startLabel);
+            w.PlaceLabel(endLabel);
         }
     }
 
@@ -402,7 +421,6 @@ namespace CompilingMethods.Classes.ParserScripts
         public override void ResolveNames(Scope scope)
         {
             TargetNode = scope.ResolveName(ident);
-            StackSlot = Scope.StackSlotIndex;
             value.ResolveNames(scope);
         }
         
@@ -415,8 +433,12 @@ namespace CompilingMethods.Classes.ParserScripts
         public override void GenCode(CodeWriter w)
         {
             value.GenCode(w);
-            w.Write(Instructions.SetL, StackSlot);
-            //w.Write(Instructions.Ret);
+            
+            if(TargetNode is StmtVar decl)
+                w.Write(Instructions.SetL, decl.StackSlot);
+            else
+                throw new Exception("var assign bad pls send help");
+            
         }
     }
 
@@ -449,6 +471,21 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
+            if (fnCall.GetToken().Value is string name)
+            {
+                if (name == "printInt")
+                {
+                    (fnCall as ExprFnCall)?.Args.ForEach(arg => arg.GenCode(w));
+                    w.Write(Instructions.Print);
+                    return;
+                }
+                else if (name == "readInt")
+                {
+                    (fnCall as ExprFnCall)?.Args.ForEach(arg => arg.GenCode(w));
+                    w.Write(Instructions.Read);
+                    return;
+                }
+            }
             w.Write(Instructions.CallBegin);
             fnCall.GenCode(w);
             w.Write(Instructions.Pop);

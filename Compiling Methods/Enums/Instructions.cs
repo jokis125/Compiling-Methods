@@ -31,7 +31,10 @@ namespace CompilingMethods.Enums
         Call,
         //
         Exit,
-        Alloc
+        Alloc,
+        Read,
+        Print
+        //Print
         
     }
 }

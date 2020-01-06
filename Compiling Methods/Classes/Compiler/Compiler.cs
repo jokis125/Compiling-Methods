@@ -36,7 +36,7 @@ namespace CompilingMethods.Classes.Compiler
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                //throw;
+                throw;
                 return;
             }
 
@@ -113,6 +113,9 @@ namespace CompilingMethods.Classes.Compiler
             
             Instruction.AddInstruction(0x46, Instructions.Exit, 0);
             Instruction.AddInstruction(0x47, Instructions.Alloc, 1);
+            
+            Instruction.AddInstruction(0x90, Instructions.Read, 0);
+            Instruction.AddInstruction(0x91, Instructions.Print, 0);
         }
     }
 }

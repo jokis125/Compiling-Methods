@@ -27,11 +27,15 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public DeclFn(TypePrim type, Token name, List<Param> parameters, List<IStatement> body)
         {
-            var bodyAndParams = new Node[body.Count + parameters.Count + 1];
-            Array.Copy(parameters.ToArray(), bodyAndParams, parameters.Count);
-            Array.Copy(body.ToArray(), bodyAndParams, body.Count);
-            bodyAndParams[body.Count + parameters.Count] = type;
-            AddChildren(bodyAndParams);
+            if (body != null)
+            {
+                var bodyAndParams = new Node[body.Count + parameters.Count + 1];
+                Array.Copy(parameters.ToArray(), bodyAndParams, parameters.Count);
+                Array.Copy(body.ToArray(), bodyAndParams, body.Count);
+                bodyAndParams[body.Count + parameters.Count] = type;
+                AddChildren(bodyAndParams);
+            }
+
             this.type = type;
             this.name = name;
             this.parameters = parameters;
@@ -68,7 +72,7 @@ namespace CompilingMethods.Classes.ParserScripts
             Scope.StackSlotIndex = 0;
             var scope = new Scope(parentScope);
             parameters.ForEach(param => param.ResolveNames(scope));
-            body.ForEach(bod => bod.ResolveNames(scope));
+            body?.ForEach(bod => bod.ResolveNames(scope));
             numLocals = Scope.StackSlotIndex;
         }
 

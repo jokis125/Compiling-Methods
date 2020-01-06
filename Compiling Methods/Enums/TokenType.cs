@@ -48,6 +48,8 @@ namespace CompilingMethods.Enums
         True,
         False,
         Void,
-        Eof
+        Eof,
+        Print,
+        Read,
     }
 }

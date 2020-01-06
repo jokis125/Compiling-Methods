@@ -297,14 +297,15 @@ namespace CompilingMethods.Classes.ParserScripts
 
     public class ExprFnCall : IExpression, ITargetNode
     {
-        private readonly List<IExpression> args;
         private readonly Token ident;
+
+        public List<IExpression> Args { get; }
 
         public ExprFnCall(Token ident, List<IExpression> args)
         {
             AddChildren(args.ToArray());
             this.ident = ident;
-            this.args = args;
+            this.Args = args;
         }
 
         public Node TargetNode { get; set; }
@@ -312,7 +313,7 @@ namespace CompilingMethods.Classes.ParserScripts
         public override void PrintNode(AstPrinter p)
         {
             p.Print("ident", ident);
-            p.Print("args", args);
+            p.Print("args", Args);
         }
 
         public override Token GetToken()
@@ -323,7 +324,7 @@ namespace CompilingMethods.Classes.ParserScripts
         public override void ResolveNames(Scope scope)
         {
             TargetNode = scope.ResolveName(ident);
-            foreach (var arg in args)
+            foreach (var arg in Args)
             {
                 arg.ResolveNames(scope);
             }
@@ -336,7 +337,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override TypePrim CheckTypes()
         {
-            var argTypes = args.Select(x => x.CheckTypes()).ToList();
+            var argTypes = Args.Select(x => x.CheckTypes()).ToList();
 
             if (TargetNode == null)
                 return null;
@@ -373,11 +374,11 @@ namespace CompilingMethods.Classes.ParserScripts
         public override void GenCode(CodeWriter w)
         {
             w.Write(Instructions.CallBegin);
-            foreach (var expression in args)
+            foreach (var expression in Args)
             {
                 expression.GenCode(w);
             }
-            w.Write(Instructions.Call, (TargetNode as DeclFn)?.StartLabel, args.Count); //@targetnode,startlabel??????????
+            w.Write(Instructions.Call, (TargetNode as DeclFn)?.StartLabel, Args.Count); 
         }
     }
 }

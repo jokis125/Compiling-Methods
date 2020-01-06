@@ -1,5 +1,6 @@
 using System;
 using CompilingMethods.Enums;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace CompilingMethods.Classes.Lexer
 {
@@ -11,7 +12,7 @@ namespace CompilingMethods.Classes.Lexer
             Value = newValue;
             LineN = newLineNr;
         }
-
+        
         public TokenType State { get; }
 
         public dynamic Value { get; }

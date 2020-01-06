@@ -30,6 +30,8 @@ namespace CompilingMethods.Classes.ParserScripts
                 TokenType.String => PrimType.@string,
                 TokenType.LitStr => PrimType.@string,
                 TokenType.Boolean => PrimType.@bool,
+                TokenType.Print => PrimType.@void,
+                TokenType.Read => PrimType.@int,
                 TokenType.Void => PrimType.@void,
                 _ => this.kind
             };

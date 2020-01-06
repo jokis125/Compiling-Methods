@@ -116,6 +116,14 @@ namespace CompilingMethods.Classes.Interpreter
                 case Instructions.Call:
                     ExecCall(ReadImm(), ReadImm());
                     break;
+                case Instructions.Read:
+                    a = Convert.ToInt32(Console.ReadLine());
+                    Push(a);
+                    break;
+                case Instructions.Print:
+                    a = Pop();
+                    Console.WriteLine(a);
+                    break;
                 case Instructions.Exit:
                     running = false;
                     break;

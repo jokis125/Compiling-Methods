@@ -61,6 +61,14 @@ namespace CompilingMethods.Classes.ParserScripts
         
         public override void ResolveNames(Scope scope)
         {
+            var printToken = new Token(TokenType.Print, "printInt", 0);
+            var readToken = new Token(TokenType.Read, "readInt", 0);
+            var printType = new TypePrim(printToken);
+            var readType = new TypePrim(readToken);
+            
+            scope.Add(printToken, new DeclFn(printType, printToken, new List<Param> { new Param(printToken, new TypePrim(new Token(TokenType.Void, null, 0)))}, null));
+            scope.Add(readToken, new DeclFn(readType, readToken, new List<Param>(),null));
+
             decls.ForEach(decl => scope.Add(decl.ReturnName(), decl));
             decls.ForEach(decl => decl.ResolveNames(scope));
         }
