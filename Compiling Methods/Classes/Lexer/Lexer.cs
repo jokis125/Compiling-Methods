@@ -228,6 +228,9 @@ namespace CompilingMethods.Classes.Lexer
                 case char c when c == '*':
                     BeginToken(State.OpMul);
                     break;
+                case char c when c == '%':
+                    BeginToken(State.OpMod);
+                    break;
                 case char c when c == ';':
                     BeginToken(State.Separator);
                     CompleteToken(TokenType.Separator);
@@ -559,6 +562,16 @@ namespace CompilingMethods.Classes.Lexer
                     break;
             }
         }
+        
+        private void LexLitOpMod()
+        {
+            switch (currentChar)
+            {
+                default:
+                    CompleteToken(TokenType.OpMod, false);
+                    break;
+            }
+        }
 
         private void LexOpOr()
         {
@@ -626,6 +639,9 @@ namespace CompilingMethods.Classes.Lexer
                     break;
                 case State.OpMul:
                     LexLitOpMult();
+                    break;
+                case State.OpMod:
+                    LexLitOpMod();
                     break;
                 case State.OpAdd:
                     LexLitOpAdd();

@@ -7,6 +7,7 @@ namespace CompilingMethods.Enums
         Sub,
         AssSub,
         Div,
+        Mod,
         AssDiv,
         Mul,
         AssMul,

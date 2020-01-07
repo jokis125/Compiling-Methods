@@ -113,6 +113,11 @@ namespace CompilingMethods.Classes.Compiler
             Instruction.AddInstruction(0x11, Instructions.IntSub, 0);
             Instruction.AddInstruction(0x12, Instructions.IntMul, 0);
             Instruction.AddInstruction(0x13, Instructions.IntDiv, 0);
+            Instruction.AddInstruction(0x14, Instructions.IntMod, 0);
+            Instruction.AddInstruction(0x15, Instructions.FloatAdd, 0);
+            Instruction.AddInstruction(0x16, Instructions.FloatSub, 0);
+            Instruction.AddInstruction(0x17, Instructions.FloatMul, 0);
+            Instruction.AddInstruction(0x18, Instructions.FloatDiv, 0);
             //Comparison
             Instruction.AddInstruction(0x20, Instructions.IntLess, 0);
             Instruction.AddInstruction(0x21, Instructions.IntLessEqual, 0);

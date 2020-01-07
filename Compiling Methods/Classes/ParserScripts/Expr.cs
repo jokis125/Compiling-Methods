@@ -65,7 +65,7 @@ namespace CompilingMethods.Classes.ParserScripts
         }
     }
 
-    public class ExprConst : IExpression
+    public class ExprConst : IExpression, ITargetNode
     {
         private Token constant;
 
@@ -74,6 +74,25 @@ namespace CompilingMethods.Classes.ParserScripts
             this.constant = constant;
         }
 
+        public PrimType ToPrimType()
+        {
+            return constant.State switch
+            {
+                TokenType.Int => PrimType.@int,
+                TokenType.LitInt => PrimType.@int,
+                TokenType.Char => PrimType.@char,
+                TokenType.Float => PrimType.@float,
+                TokenType.LitFloat => PrimType.@float,
+                TokenType.String => PrimType.@string,
+                TokenType.LitStr => PrimType.@string,
+                TokenType.Boolean => PrimType.@bool,
+                TokenType.Print => PrimType.@void,
+                TokenType.Read => PrimType.@int,
+                TokenType.Void => PrimType.@void,
+                _ => PrimType.@void
+            };
+        }
+        
         public override void PrintNode(AstPrinter p)
         {
             p.Print("const", constant.Value.ToString());
@@ -136,6 +155,8 @@ namespace CompilingMethods.Classes.ParserScripts
                     throw new SystemException("Could not generate code");
             }
         }
+
+        public Node TargetNode { get; set; }
     }
 
     public class ExprBin : IExpression
@@ -189,16 +210,62 @@ namespace CompilingMethods.Classes.ParserScripts
             switch (op)
             {
                 case ExprBinKind.Add:
-                    w.Write(Instructions.IntAdd);
+                    var type = ((left as ITargetNode)?.TargetNode as StmtVar)?.Type ?? new TypePrim(left.GetToken());
+                    //var type = left.GetToken().
+                    if(type?.Kind == PrimType.@int)
+                        w.Write(Instructions.IntAdd);
+                    else if(type?.Kind == PrimType.@float)
+                        w.Write(Instructions.FloatAdd);
+                    else
+                        w.Write(Instructions.IntAdd);
                     break;
                 case ExprBinKind.Sub:
-                    w.Write(Instructions.IntSub);
+                    type = ((left as ITargetNode)?.TargetNode as StmtVar)?.Type ?? new TypePrim(left.GetToken());
+                    switch (type?.Kind)
+                    {
+                        case PrimType.@int:
+                            w.Write(Instructions.IntSub);
+                            break;
+                        case PrimType.@float:
+                            w.Write(Instructions.FloatSub);
+                            break;
+                        default:
+                            w.Write(Instructions.IntSub);
+                            break;
+                    }
                     break;
                 case ExprBinKind.Mul:
-                    w.Write(Instructions.IntMul);
+                    type = ((left as ITargetNode)?.TargetNode as StmtVar)?.Type ?? new TypePrim(left.GetToken());
+                    switch (type?.Kind)
+                    {
+                        case PrimType.@int:
+                            w.Write(Instructions.IntMul);
+                            break;
+                        case PrimType.@float:
+                            w.Write(Instructions.FloatMul);
+                            break;
+                        default:
+                            w.Write(Instructions.IntMul);
+                            break;
+                    }
                     break;
                 case ExprBinKind.Div:
-                    w.Write(Instructions.IntDiv);
+                    type = ((left as ITargetNode)?.TargetNode as StmtVar)?.Type ?? new TypePrim(left.GetToken());
+                    switch (type?.Kind)
+                    {
+                        case PrimType.@int:
+                            w.Write(Instructions.IntDiv);
+                            break;
+                        case PrimType.@float:
+                            w.Write(Instructions.FloatDiv);
+                            break;
+                        default:
+                            w.Write(Instructions.IntDiv);
+                            break;
+                    }
+                    break;
+                case ExprBinKind.Mod:
+                    w.Write(Instructions.IntMod);
                     break;
                 case ExprBinKind.Less:
                     w.Write(Instructions.IntLess);

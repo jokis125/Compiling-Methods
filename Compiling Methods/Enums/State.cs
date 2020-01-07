@@ -21,6 +21,7 @@ namespace CompilingMethods.Enums
         OpSub,
         OpMul,
         OpDiv,
+        OpMod,
         OpComma,
         OpAnd,
         OpBinAnd,

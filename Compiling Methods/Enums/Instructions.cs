@@ -7,6 +7,7 @@ namespace CompilingMethods.Enums
         IntSub,
         IntMul,
         IntDiv,
+        IntMod,
         FloatAdd,
         FloatSub,
         FloatMul,

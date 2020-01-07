@@ -23,8 +23,8 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public StmtIf(List<Branch> branches, StmtBlock elseBody)
         {
-            var temp = new Node[branches.Count + 1];
-            temp[branches.Count] = elseBody;
+            /*var temp = new Node[branches.Count + 1];
+            temp[branches.Count] = elseBody;*/
             
             AddChildren(branches.ToArray());
             AddChildren(elseBody);
@@ -110,6 +110,8 @@ namespace CompilingMethods.Classes.ParserScripts
         public Label EndLabel;
         public Branch(IExpression condition, StmtBlock body)
         {
+                        
+            AddChildren(condition, body);
             Condition = condition;
             Body = body;
             
@@ -119,13 +121,9 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void PrintNode(AstPrinter p)
         {
-            
-            AddChildren(Condition);
-            AddChildren(Body);
             p.Print("Cond", Condition);
             p.Print("Body", Body);
-            
-            
+
         }
 
         public override void ResolveNames(Scope scope)
@@ -232,7 +230,7 @@ namespace CompilingMethods.Classes.ParserScripts
         private readonly Token kw;
         private Node TargetNode { get; set; }
 
-        public Label endLabel;
+        public Label EndLabel;
 
         public StmtBreak(Token kw)
         {
@@ -266,7 +264,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
             var program = FindAncestor(typeof(StmtWhile));
             if (program != null)
-                endLabel = (program as StmtWhile)?.endLabel;
+                EndLabel = (program as StmtWhile)?.endLabel;
         }
         
 
@@ -278,7 +276,7 @@ namespace CompilingMethods.Classes.ParserScripts
 
         public override void GenCode(CodeWriter w)
         {
-            w.Write(Instructions.Br, endLabel);
+            w.Write(Instructions.Br, EndLabel);
         }
     }
     
@@ -286,7 +284,7 @@ namespace CompilingMethods.Classes.ParserScripts
     {
         private readonly Token kw;
         private Node TargetNode { get; set; }
-        public Label startLabel;
+        public Label StartLabel;
 
         public StmtContinue(Token kw)
         {
@@ -319,7 +317,7 @@ namespace CompilingMethods.Classes.ParserScripts
             
             var program = FindAncestor(typeof(StmtWhile));
             if (program != null)
-                startLabel = (program as StmtWhile)?.startLabel;
+                StartLabel = (program as StmtWhile)?.startLabel;
         }
 
         public override TypePrim CheckTypes()
@@ -330,7 +328,7 @@ namespace CompilingMethods.Classes.ParserScripts
         
         public override void GenCode(CodeWriter w)
         {
-            w.Write(Instructions.Br, startLabel); //TODO :LOOP_END
+            w.Write(Instructions.Br, StartLabel); 
         }
     }
     
@@ -441,7 +439,7 @@ namespace CompilingMethods.Classes.ParserScripts
         }
     }
 
-    public class StmtVarAssign : IStatement, IStackSlot
+    public class StmtVarAssign : IStatement, IStackSlot, ITargetNode
     {
         private readonly Token ident;
         private readonly TokenType op;
@@ -488,7 +486,7 @@ namespace CompilingMethods.Classes.ParserScripts
         }
     }
 
-    public class StmtFnCall : IStatement //TO-EXPRESSION
+    public class StmtFnCall : IStatement, ITargetNode //TO-EXPRESSION
     {
         private readonly IExpression fnCall;
         public Node TargetNode { get; set; }

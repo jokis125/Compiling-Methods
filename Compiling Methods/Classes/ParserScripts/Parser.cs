@@ -178,8 +178,8 @@ namespace CompilingMethods.Classes.ParserScripts
         private IExpression ParseExprMul()
         {
             var result = ParseExprPrimary();
-            while (Accept(TokenType.OpMul) != null || Accept(TokenType.OpDiv) != null)
-                result = new ExprBinaryArithmetic(ExprBinKind.Mul, result, ParseExprPrimary());
+            /*while (Accept(TokenType.OpMul) != null || Accept(TokenType.OpDiv) != null || Accept(TokenType.OpMod) != null)
+                result = new ExprBinaryArithmetic(ExprBinKind.Mul, result, ParseExprPrimary());*/
             while (true)
                 if (Accept(TokenType.OpMul) != null)
                     result = new ExprBinaryArithmetic(ExprBinKind.Mul, result, ParseExprMul());
@@ -189,6 +189,8 @@ namespace CompilingMethods.Classes.ParserScripts
                     result = new ExprBinaryArithmetic(ExprBinKind.AssMul, result, ParseExprMul());
                 else if (Accept(TokenType.OpAssDiv) != null)
                     result = new ExprBinaryArithmetic(ExprBinKind.AssDiv, result, ParseExprMul());
+                else if (Accept(TokenType.OpMod) != null)
+                    result = new ExprBinaryArithmetic(ExprBinKind.Mod, result, ParseExprMul());
                 else
                     break;
 

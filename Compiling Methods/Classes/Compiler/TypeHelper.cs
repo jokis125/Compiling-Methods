@@ -30,8 +30,8 @@ namespace CompilingMethods.Classes.Compiler
                     $"type kind mismatch: expected {type0}, got {type1}");
             if (type0.GetType() == typeof(TypePrim) || type1.GetType() == typeof(TypePrim))
             {
-                var prim0 = type0 as TypePrim;
-                var prim1 = type1 as TypePrim;
+                var prim0 = type0;
+                var prim1 = type1;
                 
                 if(prim0.Kind != prim1.Kind)
                     SemanticError(type0.Token == null ? type1.Token : type0.Token,

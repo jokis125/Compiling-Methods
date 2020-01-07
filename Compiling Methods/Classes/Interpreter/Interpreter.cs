@@ -51,6 +51,7 @@ namespace CompilingMethods.Classes.Interpreter
             var hexopcode = ReadImm();
             var opcode = GlobalVars.InstrsByOpCode[hexopcode].Name;
             int a, b, i;
+            float aa, bb;
 
             switch(opcode) {
                 case Instructions.IntAdd:
@@ -61,8 +62,8 @@ namespace CompilingMethods.Classes.Interpreter
                 case Instructions.FloatAdd:
                     b = Pop();
                     a = Pop();
-                    float aa = Program.Int32BitsToSingle(a);
-                    float bb = Program.Int32BitsToSingle(b);
+                    aa = Program.Int32BitsToSingle(a);
+                    bb = Program.Int32BitsToSingle(b);
                     Push(Program.SingleToInt32Bits(aa + bb));
                     break;
                 case Instructions.IntSub:
@@ -70,15 +71,41 @@ namespace CompilingMethods.Classes.Interpreter
                     a = Pop();
                     Push(a - b);
                     break;
+                case Instructions.FloatSub:
+                    b = Pop();
+                    a = Pop();
+                    aa = Program.Int32BitsToSingle(a);
+                    bb = Program.Int32BitsToSingle(b);
+                    Push(Program.SingleToInt32Bits(aa - bb));
+                    break;
                 case Instructions.IntMul:
                     b = Pop();
                     a = Pop();
                     Push(a * b);
                     break;
+                case Instructions.FloatMul:
+                    b = Pop();
+                    a = Pop();
+                    aa = Program.Int32BitsToSingle(a);
+                    bb = Program.Int32BitsToSingle(b);
+                    Push(Program.SingleToInt32Bits(aa * bb));
+                    break;
+                case Instructions.FloatDiv:
+                    b = Pop();
+                    a = Pop();
+                    aa = Program.Int32BitsToSingle(a);
+                    bb = Program.Int32BitsToSingle(b);
+                    Push(Program.SingleToInt32Bits(aa / bb));
+                    break;
                 case Instructions.IntDiv:
                     b = Pop();
                     a = Pop();
                     Push(a / b);
+                    break;
+                case Instructions.IntMod:
+                    b = Pop();
+                    a = Pop();
+                    Push(a % b);
                     break;
                 case Instructions.IntLess:
                     b = Pop();
@@ -89,6 +116,16 @@ namespace CompilingMethods.Classes.Interpreter
                     b = Pop();
                     a = Pop();
                     Push(a <= b ? 1 : 0);
+                    break;
+                case Instructions.IntMore:
+                    b = Pop();
+                    a = Pop();
+                    Push(a > b ? 1 : 0);
+                    break;
+                case Instructions.IntMoreEqual:
+                    b = Pop();
+                    a = Pop();
+                    Push(a >= b ? 1 : 0);
                     break;
                 case Instructions.IntEqual:
                     b = Pop();
