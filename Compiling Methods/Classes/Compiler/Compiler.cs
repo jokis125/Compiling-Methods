@@ -37,7 +37,7 @@ namespace CompilingMethods.Classes.Compiler
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                throw;
+                //throw;
                 return;
             }
 
@@ -63,7 +63,8 @@ namespace CompilingMethods.Classes.Compiler
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                throw;
+                GlobalVars.running = false;
+                //throw;
             }
             try
             {
@@ -72,7 +73,7 @@ namespace CompilingMethods.Classes.Compiler
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                throw;
+                //throw;
             }
             
             if(!GlobalVars.running)
@@ -87,7 +88,7 @@ namespace CompilingMethods.Classes.Compiler
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                throw;
+                //throw;
                 return;
                 
             }
@@ -99,8 +100,15 @@ namespace CompilingMethods.Classes.Compiler
             }
             catch (Exception e)
             {
+
+                /*if (e is System.FormatException)
+                {
+                    //Console.WriteLine($"{GlobalVars.FileName}:{}:Error :Input was not an integer");
+                    //throw;
+                    return;
+                }*/
                 Console.WriteLine(e.Message);
-                throw;
+                //throw;
             }
             
             

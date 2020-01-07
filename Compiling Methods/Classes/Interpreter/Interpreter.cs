@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using CompilingMethods.Classes.Compiler;
 using CompilingMethods.Enums;
 
@@ -165,15 +166,21 @@ namespace CompilingMethods.Classes.Interpreter
                     ExecRet(Pop());
                     break;
                 case Instructions.CallBegin:
-                    Push(0);
-                    Push(0);
-                    Push(0);
+                    if (!Push(0)) break;
+                    if (!Push(0)) break;
+                    if (!Push(0)) break;
                     break;
                 case Instructions.Call:
                     ExecCall(ReadImm(), ReadImm());
                     break;
                 case Instructions.Read:
-                    a = Convert.ToInt32(Console.ReadLine());
+                    var afk = Console.ReadLine();
+                    while (!afk.All(char.IsDigit) || afk == "")
+                    {
+                        Console.WriteLine($"'{afk}' is not an integer");
+                        afk = Console.ReadLine();
+                    }
+                    a = Convert.ToInt32(afk);
                     Push(a);
                     break;
                 case Instructions.Print:
@@ -226,10 +233,15 @@ namespace CompilingMethods.Classes.Interpreter
             return memory[sp];
         }
 
-        public void Push(int value)
+        public bool Push(int value)
         {
+            if (sp == 4096)
+            {
+                throw new Exception($"{GlobalVars.FileName}:1:Error: Reached stack limit");
+            }
             memory[sp] = value;
             sp++;
+            return true;
         }
 
         public int ReadImm()
